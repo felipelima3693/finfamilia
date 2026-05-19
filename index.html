@@ -4,18 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FinFamília - Controle Financeiro</title>
+    <script src="https://unpkg.com/chart.js@3.9.1/dist/chart.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&display=swap');
-        
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
         html, body { width: 100%; height: 100%; background: #0B0F1A; }
         body { display: flex; }
-        
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: #0B0F1A; }
         ::-webkit-scrollbar-thumb { background: #1E2A3A; border-radius: 2px; }
 
-        /* Sidebar */
         .sidebar { width: 200px; background: #0F1624; border-right: 1px solid #1A2333; padding: 20px 10px; display: flex; flex-direction: column; gap: 2px; }
         .logo { display: flex; align-items: center; gap: 8px; padding: 0 13px 20px; border-bottom: 1px solid #1A2333; margin-bottom: 12px; font-size: 15px; font-weight: 800; color: #F59E0B; }
         .nav-btn { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 7px; border: none; background: transparent; color: #6B7280; cursor: pointer; font-size: 13px; font-weight: 500; width: 100%; text-align: left; transition: all 0.15s; }
@@ -26,22 +24,24 @@
         .user-info { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
         .logout-btn { width: 100%; padding: 7px; border: 1px solid #1A2333; border-radius: 6px; background: transparent; color: #6B7280; cursor: pointer; font-size: 11px; }
 
-        /* Main */
         main { flex: 1; overflow: auto; padding: 20px; background: #0B0F1A; color: #F9FAFB; }
-        .content { max-width: 960px; margin: 0 auto; }
+        .content { max-width: 1000px; margin: 0 auto; }
         .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
         .header h2 { font-size: 19px; font-weight: 800; color: #F9FAFB; letter-spacing: -0.3px; }
         .add-btn { padding: 8px 16px; background: #F59E0B; border: none; border-radius: 7px; color: #0B0F1A; font-weight: 700; cursor: pointer; font-size: 13px; }
         .add-btn:hover { opacity: 0.9; }
 
-        /* Cards */
         .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
         .card { background: #0F1624; border-radius: 11px; padding: 16px; border: 1px solid #1A2333; }
         .card.summary { border-top: 3px solid; }
         .card-label { font-size: 10px; color: #6B7280; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; }
         .card-value { font-size: 21px; font-weight: 800; letter-spacing: -0.5px; }
 
-        /* Transactions List */
+        .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+        .chart-card { background: #0F1624; border-radius: 11px; padding: 16px; border: 1px solid #1A2333; }
+        .chart-title { font-size: 10px; color: #6B7280; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; }
+        .chart-container { position: relative; height: 250px; margin-bottom: 8px; }
+
         .tx-list { display: flex; flex-direction: column; gap: 0; }
         .tx-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #111827; }
         .tx-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
@@ -51,7 +51,19 @@
         .tx-amount { font-size: 13px; font-weight: 700; flex-shrink: 0; }
         .tx-delete { background: transparent; border: none; color: #374151; cursor: pointer; font-size: 12px; padding: 2px 6px; }
 
-        /* Modal */
+        .chat-container { background: #0F1624; border-radius: 12px; border: 1px solid #1A2333; overflow: hidden; display: flex; flex-direction: column; height: 60vh; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+        .chat-bubble { max-width: 73%; padding: 10px 13px; border-radius: 11px; font-size: 13px; line-height: 1.65; white-space: pre-wrap; }
+        .chat-user { align-self: flex-end; background: #F59E0B; color: #0B0F1A; font-weight: 500; }
+        .chat-bot { align-self: flex-start; background: #1A2333; color: #E5E7EB; }
+        .action-badge { display: block; font-size: 9px; color: #10B981; font-weight: 700; margin-bottom: 3px; letter-spacing: 0.1em; }
+        .chat-input-area { display: flex; border-top: 1px solid #1A2333; }
+        .chat-input { flex: 1; padding: 12px 14px; background: #0B0F1A; border: none; color: #F9FAFB; font-size: 13px; outline: none; }
+        .chat-input::placeholder { color: #4B5563; }
+        .chat-send { padding: 12px 17px; background: #F59E0B; border: none; color: #0B0F1A; font-weight: 700; cursor: pointer; }
+        .chat-suggestions { padding: 7px 13px; border-top: 1px solid #1A2333; display: flex; gap: 6px; flex-wrap: wrap; background: #0B0F1A; }
+        .chat-suggestion { padding: 3px 9px; background: transparent; border: 1px solid #1A2333; border-radius: 20px; color: #6B7280; font-size: 10px; cursor: pointer; }
+
         .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.78); display: none; align-items: center; justify-content: center; z-index: 999; }
         .modal-overlay.show { display: flex; }
         .modal { background: #0F1624; border-radius: 15px; padding: 24px; width: 340px; border: 1px solid #1A2333; }
@@ -66,7 +78,6 @@
         .btn-cancel { flex: 1; padding: 10px; border: 1px solid #1A2333; border-radius: 7px; background: transparent; color: #6B7280; cursor: pointer; font-size: 13px; }
         .btn-submit { flex: 1; padding: 10px; border: none; border-radius: 7px; background: #F59E0B; color: #0B0F1A; font-weight: 700; cursor: pointer; font-size: 13px; }
 
-        /* Login/Config Screens */
         .page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #0B0F1A; }
         .login-card { background: #0F1624; border-radius: 15px; padding: 32px; width: 330px; border: 1px solid #1A2333; }
         .config-card { background: #0F1624; border-radius: 15px; padding: 32px; width: 430px; border: 1px solid #1A2333; }
@@ -85,16 +96,17 @@
         .sql-toggle { margin-top: 6px; padding: 6px 12px; background: transparent; border: 1px solid #374151; border-radius: 6px; color: #9CA3AF; font-size: 11px; cursor: pointer; width: 100%; }
         .sql-textarea { width: 100%; margin-top: 9px; padding: 10px; background: #0B0F1A; border: 1px solid #1A2333; border-radius: 7px; color: #10B981; font-size: 11px; font-family: monospace; height: 160px; resize: none; }
 
-        /* Hide/Show */
-        .hidden { display: none; }
+        @media (max-width: 900px) {
+            .charts-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar" style="display:none;">
         <div class="logo">💰 FinFamília</div>
         <button class="nav-btn active" onclick="switchTab('dashboard')">◈ Dashboard</button>
         <button class="nav-btn" onclick="switchTab('transactions')">↕ Transações</button>
+        <button class="nav-btn" onclick="switchTab('chat')">✦ IA</button>
         <div class="user-section">
             <div class="user-info">
                 <div class="avatar" id="avatarLetter">F</div>
@@ -104,17 +116,14 @@
         </div>
     </aside>
 
-    <!-- Main -->
     <main id="mainContent" style="display:none;">
         <div class="content">
-            <!-- Dashboard Tab -->
             <div id="dashboardTab">
                 <div class="header">
                     <h2>Dashboard</h2>
                     <button class="add-btn" onclick="openAddForm()">+ Adicionar</button>
                 </div>
 
-                <!-- Cards -->
                 <div class="cards-grid">
                     <div class="card summary" style="border-top-color: #10B981;">
                         <div class="card-label">Receitas</div>
@@ -134,16 +143,29 @@
                     </div>
                 </div>
 
-                <!-- Transactions -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-title">Receitas vs Despesas (6 meses)</div>
+                        <div class="chart-container">
+                            <canvas id="barChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-title">Despesas por Categoria</div>
+                        <div class="chart-container">
+                            <canvas id="pieChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card">
                     <div style="font-size: 10px; color: #6B7280; font-weight: 700; text-transform: uppercase; margin-bottom: 12px;">Transações Recentes</div>
                     <div class="tx-list" id="txList">
-                        <p style="color:#4B5563; text-align:center; padding:24px; font-size:12px;">Nenhuma transação ainda. Adicione a primeira!</p>
+                        <p style="color:#4B5563; text-align:center; padding:24px; font-size:12px;">Nenhuma transação ainda</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Transactions Tab -->
             <div id="transactionsTab" style="display:none;">
                 <div class="header">
                     <h2>Transações</h2>
@@ -151,14 +173,33 @@
                 </div>
                 <div class="card">
                     <div class="tx-list" id="txListFull">
-                        <p style="color:#4B5563; text-align:center; padding:24px; font-size:12px;">Nenhuma transação ainda</p>
+                        <p style="color:#4B5563; text-align:center; padding:24px; font-size:12px;">Nenhuma transação</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="chatTab" style="display:none;">
+                <div class="header">
+                    <h2>Assistente IA ✦</h2>
+                </div>
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="chat-bubble chat-bot">Olá Felipe e Stephanie! 💰<br><br>Sou sua assistente financeira.<br><br>Tente: "Gastei R$50 no mercado" ou "Como estão os gastos?"</div>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" class="chat-input" id="chatInput" placeholder="Ex: Gastei R$45 no almoço..." onkeydown="if(event.key==='Enter') sendChat()">
+                        <button class="chat-send" onclick="sendChat()">➤</button>
+                    </div>
+                    <div class="chat-suggestions">
+                        <button class="chat-suggestion" onclick="setChatInput('Gastei R$80 no mercado')">Gastei R$80 no mercado</button>
+                        <button class="chat-suggestion" onclick="setChatInput('Como estão os gastos?')">Como estão os gastos?</button>
+                        <button class="chat-suggestion" onclick="setChatInput('Recebi meu salário')">Recebi meu salário</button>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Login Screen -->
     <div id="loginScreen" class="page">
         <div class="login-card">
             <div class="card-header">
@@ -177,7 +218,6 @@
         </div>
     </div>
 
-    <!-- Config Screen -->
     <div id="configScreen" class="page" style="display:none;">
         <div class="config-card">
             <div class="card-header">
@@ -206,7 +246,7 @@
                     </div>
                 </div>
                 <button class="sql-toggle" onclick="toggleSQL()">▼ Mostrar SQL</button>
-                <textarea id="sqlCode" class="sql-textarea" readonly onclick="this.select()">CREATE TABLE IF NOT EXISTS transactions (
+                <textarea id="sqlCode" class="sql-textarea" readonly onclick="this.select()" style="display:none;">CREATE TABLE IF NOT EXISTS transactions (
   id          bigserial primary key,
   type        text    not null,
   description text    not null,
@@ -237,7 +277,6 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
         </div>
     </div>
 
-    <!-- Add Transaction Modal -->
     <div id="addModal" class="modal-overlay">
         <div class="modal">
             <h3>Nova Transação</h3>
@@ -274,13 +313,13 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
     </div>
 
     <script>
-        // ========== STATE ==========
         let currentUser = null;
         let currentConfig = null;
         let transactions = [];
         let formType = 'expense';
+        let barChart = null;
+        let pieChart = null;
 
-        // ========== CONFIG FUNCTIONS ==========
         function loadConfig() {
             const cfg = localStorage.getItem('finfamilia_cfg');
             if (cfg) currentConfig = JSON.parse(cfg);
@@ -298,8 +337,8 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
         }
 
         function toggleSQL() {
-            const btn = event.target;
             const textarea = document.getElementById('sqlCode');
+            const btn = event.target;
             const isShown = textarea.style.display === 'block';
             textarea.style.display = isShown ? 'none' : 'block';
             btn.textContent = isShown ? '▼ Mostrar SQL' : '▲ Ocultar SQL';
@@ -341,7 +380,6 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
             }
         }
 
-        // ========== LOGIN/LOGOUT ==========
         function doLogin() {
             const user = document.getElementById('loginUser').value.toLowerCase();
             const pass = document.getElementById('loginPass').value;
@@ -379,7 +417,6 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
             document.getElementById('loginPass').value = '';
         }
 
-        // ========== MAIN APP ==========
         function showMainApp() {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('configScreen').style.display = 'none';
@@ -388,6 +425,7 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
             document.getElementById('avatarLetter').textContent = currentUser.name[0];
             document.getElementById('userName').textContent = currentUser.name;
             fetchTransactions();
+            setInterval(fetchTransactions, 30000);
         }
 
         function switchTab(tab) {
@@ -396,9 +434,16 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
 
             document.getElementById('dashboardTab').style.display = tab === 'dashboard' ? 'block' : 'none';
             document.getElementById('transactionsTab').style.display = tab === 'transactions' ? 'block' : 'none';
+            document.getElementById('chatTab').style.display = tab === 'chat' ? 'block' : 'none';
+
+            if (tab === 'dashboard') {
+                setTimeout(() => {
+                    if (barChart) barChart.resize();
+                    if (pieChart) pieChart.resize();
+                }, 100);
+            }
         }
 
-        // ========== SUPABASE FUNCTIONS ==========
         function sbHeaders() {
             return {
                 'apikey': currentConfig.key,
@@ -418,6 +463,7 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
                 transactions = data.map(t => ({ ...t, amount: parseFloat(t.amount) }));
                 renderTransactions();
                 updateCards();
+                updateCharts();
             } catch (e) {
                 console.error(e);
             }
@@ -449,7 +495,6 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
             }
         }
 
-        // ========== UI FUNCTIONS ==========
         function renderTransactions() {
             const now = new Date();
             const mo = now.getMonth();
@@ -512,6 +557,96 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
             document.getElementById('cardCount').textContent = monthTxs.length;
         }
 
+        function updateCharts() {
+            const now = new Date();
+            const mo = now.getMonth();
+            const yr = now.getFullYear();
+
+            const monthTxs = transactions.filter(t => {
+                const d = new Date(t.date);
+                return d.getMonth() === mo && d.getFullYear() === yr;
+            });
+
+            const barData = [];
+            for (let i = 5; i >= 0; i--) {
+                const d = new Date(yr, mo - i, 1);
+                const m = d.getMonth();
+                const y = d.getFullYear();
+                const mt = transactions.filter(t => {
+                    const td = new Date(t.date);
+                    return td.getMonth() === m && td.getFullYear() === y;
+                });
+                const inc = mt.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+                const exp = mt.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+                barData.push({
+                    month: d.toLocaleString('pt-BR', { month: 'short' }),
+                    receitas: inc,
+                    despesas: exp
+                });
+            }
+
+            const catData = {};
+            monthTxs.filter(t => t.type === 'expense').forEach(t => {
+                catData[t.category] = (catData[t.category] || 0) + t.amount;
+            });
+
+            const pieLabels = Object.keys(catData);
+            const pieValues = Object.values(catData);
+
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            if (barChart) barChart.destroy();
+            barChart = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: barData.map(d => d.month),
+                    datasets: [
+                        {
+                            label: 'Receitas',
+                            data: barData.map(d => d.receitas),
+                            backgroundColor: '#10B981',
+                            borderRadius: 3
+                        },
+                        {
+                            label: 'Despesas',
+                            data: barData.map(d => d.despesas),
+                            backgroundColor: '#F43F5E',
+                            borderRadius: 3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#9CA3AF', font: { size: 11 } } } },
+                    scales: {
+                        y: { ticks: { color: '#6B7280', font: { size: 10 } }, grid: { color: '#1A2333' } },
+                        x: { ticks: { color: '#6B7280', font: { size: 10 } }, grid: { display: false } }
+                    }
+                }
+            });
+
+            const pieCtx = document.getElementById('pieChart').getContext('2d');
+            if (pieChart) pieChart.destroy();
+            const colors = ['#F59E0B', '#3B82F6', '#10B981', '#8B5CF6', '#EC4899', '#06B6D4', '#F97316', '#6B7280'];
+            pieChart = new Chart(pieCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: pieLabels,
+                    datasets: [{
+                        data: pieValues,
+                        backgroundColor: colors.slice(0, pieLabels.length),
+                        borderColor: '#0F1624',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#9CA3AF', font: { size: 10 } }, position: 'bottom' } }
+                }
+            });
+        }
+
         function fmt(v) {
             return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
@@ -563,14 +698,96 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
             document.getElementById('formAmount').value = '';
         }
 
-        // ========== INIT ==========
+        function setChatInput(text) {
+            document.getElementById('chatInput').value = text;
+        }
+
+        async function sendChat() {
+            const input = document.getElementById('chatInput').value.trim();
+            if (!input) return;
+
+            document.getElementById('chatInput').value = '';
+            
+            const msgDiv = document.getElementById('chatMessages');
+            const userBubble = document.createElement('div');
+            userBubble.className = 'chat-bubble chat-user';
+            userBubble.textContent = input;
+            msgDiv.appendChild(userBubble);
+            msgDiv.scrollTop = msgDiv.scrollHeight;
+
+            try {
+                const now = new Date();
+                const mo = now.getMonth();
+                const yr = now.getFullYear();
+                const monthTxs = transactions.filter(t => {
+                    const d = new Date(t.date);
+                    return d.getMonth() === mo && d.getFullYear() === yr;
+                });
+                const income = monthTxs.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+                const expense = monthTxs.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+
+                const sys = `Você é assistente financeira do casal Felipe e Stephanie. Fale em PT-BR informal.
+Dados do mês: Receitas ${fmt(income)} | Despesas ${fmt(expense)} | Saldo ${fmt(income - expense)}
+Categorias: Alimentação, Transporte, Saúde, Lazer, Casa, Educação, Roupas, Outros
+REGRA: Se registrar gasto, responda SOMENTE com JSON:
+{"message":"confirmação","action":{"type":"add_transaction","transaction":{"type":"expense|income","description":"texto","amount":número,"category":"cat","date":"YYYY-MM-DD"}}}
+Senão, responda em texto curto e amigável.`;
+
+                const res = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 500,
+                        system: sys,
+                        messages: [{ role: 'user', content: input }]
+                    })
+                });
+
+                const data = await res.json();
+                const raw = data.content?.[0]?.text || 'Tente novamente.';
+
+                try {
+                    const p = JSON.parse(raw.trim());
+                    if (p.action?.type === 'add_transaction') {
+                        const tx = p.action.transaction;
+                        await addTransaction({
+                            type: tx.type,
+                            description: tx.description,
+                            amount: tx.amount,
+                            category: tx.category,
+                            date: tx.date,
+                            added_by: currentUser.name
+                        });
+                        const bubble = document.createElement('div');
+                        bubble.className = 'chat-bubble chat-bot';
+                        bubble.innerHTML = `<span class="action-badge">✓ SALVO</span>${p.message}`;
+                        msgDiv.appendChild(bubble);
+                    } else {
+                        const bubble = document.createElement('div');
+                        bubble.className = 'chat-bubble chat-bot';
+                        bubble.textContent = p.message || raw;
+                        msgDiv.appendChild(bubble);
+                    }
+                } catch {
+                    const bubble = document.createElement('div');
+                    bubble.className = 'chat-bubble chat-bot';
+                    bubble.textContent = raw;
+                    msgDiv.appendChild(bubble);
+                }
+            } catch (e) {
+                const bubble = document.createElement('div');
+                bubble.className = 'chat-bubble chat-bot';
+                bubble.textContent = 'Erro de conexão com IA. Mas você pode adicionar gastos manualmente!';
+                msgDiv.appendChild(bubble);
+            }
+
+            msgDiv.scrollTop = msgDiv.scrollHeight;
+        }
+
         window.addEventListener('load', () => {
             loadConfig();
-            if (currentConfig) {
-                document.getElementById('loginScreen').style.display = 'flex';
-            } else {
-                document.getElementById('loginScreen').style.display = 'flex';
-            }
+            document.getElementById('loginScreen').style.display = 'flex';
         });
     </script>
 </body>
