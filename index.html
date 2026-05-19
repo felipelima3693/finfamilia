@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinFamília - Controle Financeiro</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&display=swap');
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+        html, body { width: 100%; height: 100%; background: #0B0F1A; }
+        body { display: flex; }
+        
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #0B0F1A; }
+        ::-webkit-scrollbar-thumb { background: #1E2A3A; border-radius: 2px; }
+
+        /* Sidebar */
+        .sidebar { width: 200px; background: #0F1624; border-right: 1px solid #1A2333; padding: 20px 10px; display: flex; flex-direction: column; gap: 2px; }
+        .logo { display: flex; align-items: center; gap: 8px; padding: 0 13px 20px; border-bottom: 1px solid #1A2333; margin-bottom: 12px; font-size: 15px; font-weight: 800; color: #F59E0B; }
+        .nav-btn { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 7px; border: none; background: transparent; color: #6B7280; cursor: pointer; font-size: 13px; font-weight: 500; width: 100%; text-align: left; transition: all 0.15s; }
+        .nav-btn:hover { background: #1A2333; color: #F59E0B; }
+        .nav-btn.active { background: #1A2333; color: #F59E0B; }
+        .user-section { margin-top: auto; padding-top: 14px; border-top: 1px solid #1A2333; }
+        .avatar { width: 27px; height: 27px; border-radius: 50%; background: #F59E0B; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #0B0F1A; }
+        .user-info { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+        .logout-btn { width: 100%; padding: 7px; border: 1px solid #1A2333; border-radius: 6px; background: transparent; color: #6B7280; cursor: pointer; font-size: 11px; }
+
+        /* Main */
+        main { flex: 1; overflow: auto; padding: 20px; background: #0B0F1A; color: #F9FAFB; }
+        .content { max-width: 960px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+        .header h2 { font-size: 19px; font-weight: 800; color: #F9FAFB; letter-spacing: -0.3px; }
+        .add-btn { padding: 8px 16px; background: #F59E0B; border: none; border-radius: 7px; color: #0B0F1A; font-weight: 700; cursor: pointer; font-size: 13px; }
+        .add-btn:hover { opacity: 0.9; }
+
+        /* Cards */
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+        .card { background: #0F1624; border-radius: 11px; padding: 16px; border: 1px solid #1A2333; }
+        .card.summary { border-top: 3px solid; }
+        .card-label { font-size: 10px; color: #6B7280; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; }
+        .card-value { font-size: 21px; font-weight: 800; letter-spacing: -0.5px; }
+
+        /* Transactions List */
+        .tx-list { display: flex; flex-direction: column; gap: 0; }
+        .tx-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #111827; }
+        .tx-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+        .tx-info { flex: 1; min-width: 0; }
+        .tx-desc { font-size: 13px; color: #F9FAFB; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px; }
+        .tx-meta { font-size: 10px; color: #6B7280; }
+        .tx-amount { font-size: 13px; font-weight: 700; flex-shrink: 0; }
+        .tx-delete { background: transparent; border: none; color: #374151; cursor: pointer; font-size: 12px; padding: 2px 6px; }
+
+        /* Modal */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.78); display: none; align-items: center; justify-content: center; z-index: 999; }
+        .modal-overlay.show { display: flex; }
+        .modal { background: #0F1624; border-radius: 15px; padding: 24px; width: 340px; border: 1px solid #1A2333; }
+        .modal h3 { font-size: 15px; font-weight: 700; color: #F9FAFB; margin-bottom: 16px; }
+        .type-buttons { display: flex; gap: 8px; margin-bottom: 12px; }
+        .type-btn { flex: 1; padding: 8px; border-radius: 7px; border: 1px solid #1A2333; background: transparent; color: #6B7280; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.15s; }
+        .type-btn.active { border-color: #F59E0B; background: #F59E0B18; color: #F59E0B; }
+        .form-group { margin-bottom: 10px; }
+        .form-input, .form-select { padding: 9px 11px; background: #0B0F1A; border: 1px solid #1A2333; border-radius: 7px; color: #F9FAFB; font-size: 13px; width: 100%; outline: none; }
+        .form-input::placeholder { color: #4B5563; }
+        .form-buttons { display: flex; gap: 8px; margin-top: 12px; }
+        .btn-cancel { flex: 1; padding: 10px; border: 1px solid #1A2333; border-radius: 7px; background: transparent; color: #6B7280; cursor: pointer; font-size: 13px; }
+        .btn-submit { flex: 1; padding: 10px; border: none; border-radius: 7px; background: #F59E0B; color: #0B0F1A; font-weight: 700; cursor: pointer; font-size: 13px; }
+
+        /* Login/Config Screens */
+        .page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #0B0F1A; }
+        .login-card { background: #0F1624; border-radius: 15px; padding: 32px; width: 330px; border: 1px solid #1A2333; }
+        .config-card { background: #0F1624; border-radius: 15px; padding: 32px; width: 430px; border: 1px solid #1A2333; }
+        .card-header { text-align: center; margin-bottom: 24px; }
+        .card-title { font-size: 19px; font-weight: 800; color: #F9FAFB; margin-top: 8px; }
+        .card-subtitle { font-size: 12px; color: #6B7280; margin-top: 5px; }
+        .form-group-vertical { display: flex; flex-direction: column; gap: 10px; }
+        .primary-btn { padding: 11px; background: #F59E0B; border: none; border-radius: 7px; color: #0B0F1A; font-weight: 800; cursor: pointer; font-size: 14px; width: 100%; }
+        .error-msg { color: #F43F5E; font-size: 12px; }
+        .sql-box { background: #060912; border-radius: 10px; padding: 14px; margin: 18px 0; border: 1px solid #1A2333; }
+        .sql-title { font-size: 11px; color: #F59E0B; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; }
+        .sql-steps { display: flex; flex-direction: column; gap: 7px; }
+        .sql-step { display: flex; gap: 9px; align-items: flex-start; }
+        .step-number { width: 20px; height: 20px; border-radius: 50%; background: #F59E0B; color: #0B0F1A; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; flex-shrink: 0; margin-top: 1px; }
+        .step-text { font-size: 12px; color: #D1D5DB; }
+        .sql-toggle { margin-top: 6px; padding: 6px 12px; background: transparent; border: 1px solid #374151; border-radius: 6px; color: #9CA3AF; font-size: 11px; cursor: pointer; width: 100%; }
+        .sql-textarea { width: 100%; margin-top: 9px; padding: 10px; background: #0B0F1A; border: 1px solid #1A2333; border-radius: 7px; color: #10B981; font-size: 11px; font-family: monospace; height: 160px; resize: none; }
+
+        /* Hide/Show */
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar" style="display:none;">
+        <div class="logo">💰 FinFamília</div>
+        <button class="nav-btn active" onclick="switchTab('dashboard')">◈ Dashboard</button>
+        <button class="nav-btn" onclick="switchTab('transactions')">↕ Transações</button>
+        <div class="user-section">
+            <div class="user-info">
+                <div class="avatar" id="avatarLetter">F</div>
+                <span id="userName" style="font-size:13px; color:#D1D5DB;">Felipe</span>
+            </div>
+            <button class="logout-btn" onclick="logout()">Sair</button>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main id="mainContent" style="display:none;">
+        <div class="content">
+            <!-- Dashboard Tab -->
+            <div id="dashboardTab">
+                <div class="header">
+                    <h2>Dashboard</h2>
+                    <button class="add-btn" onclick="openAddForm()">+ Adicionar</button>
+                </div>
+
+                <!-- Cards -->
+                <div class="cards-grid">
+                    <div class="card summary" style="border-top-color: #10B981;">
+                        <div class="card-label">Receitas</div>
+                        <div class="card-value" style="color: #10B981;" id="cardIncome">R$ 0,00</div>
+                    </div>
+                    <div class="card summary" style="border-top-color: #F43F5E;">
+                        <div class="card-label">Despesas</div>
+                        <div class="card-value" style="color: #F43F5E;" id="cardExpense">R$ 0,00</div>
+                    </div>
+                    <div class="card summary" style="border-top-color: #F59E0B;">
+                        <div class="card-label">Saldo</div>
+                        <div class="card-value" style="color: #F59E0B;" id="cardBalance">R$ 0,00</div>
+                    </div>
+                    <div class="card summary" style="border-top-color: #8B5CF6;">
+                        <div class="card-label">Lançamentos</div>
+                        <div class="card-value" style="color: #8B5CF6;" id="cardCount">0</div>
+                    </div>
+                </div>
+
+                <!-- Transactions -->
+                <div class="card">
+                    <div style="font-size: 10px; color: #6B7280; font-weight: 700; text-transform: uppercase; margin-bottom: 12px;">Transações Recentes</div>
+                    <div class="tx-list" id="txList">
+                        <p style="color:#4B5563; text-align:center; padding:24px; font-size:12px;">Nenhuma transação ainda. Adicione a primeira!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transactions Tab -->
+            <div id="transactionsTab" style="display:none;">
+                <div class="header">
+                    <h2>Transações</h2>
+                    <button class="add-btn" onclick="openAddForm()">+ Adicionar</button>
+                </div>
+                <div class="card">
+                    <div class="tx-list" id="txListFull">
+                        <p style="color:#4B5563; text-align:center; padding:24px; font-size:12px;">Nenhuma transação ainda</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="page">
+        <div class="login-card">
+            <div class="card-header">
+                <div style="font-size:40px; margin-bottom:8px;">💰</div>
+                <h1 class="card-title">FinFamília</h1>
+                <p class="card-subtitle">Controle financeiro do casal</p>
+            </div>
+            <div class="form-group-vertical">
+                <input type="text" class="form-input" id="loginUser" placeholder="Usuário (felipe ou stephanie)">
+                <input type="password" class="form-input" id="loginPass" placeholder="Senha">
+                <div id="loginError" class="error-msg"></div>
+                <button class="primary-btn" onclick="doLogin()">Entrar →</button>
+                <p style="font-size:10px; color:#374151; text-align:center;">Senha: <b style="color:#6B7280;">familia123</b></p>
+            </div>
+            <button onclick="showConfigScreen()" style="margin-top:18px; background:transparent; border:none; color:#374151; font-size:11px; cursor:pointer; width:100%;">⚙ Configurar Supabase</button>
+        </div>
+    </div>
+
+    <!-- Config Screen -->
+    <div id="configScreen" class="page" style="display:none;">
+        <div class="config-card">
+            <div class="card-header">
+                <div style="font-size:38px; margin-bottom:8px;">🔗</div>
+                <h1 class="card-title">Configurar Supabase</h1>
+                <p class="card-subtitle">Sincronize Felipe e Stephanie em tempo real</p>
+            </div>
+            <div class="sql-box">
+                <div class="sql-title">Setup em 5 minutos</div>
+                <div class="sql-steps">
+                    <div class="sql-step">
+                        <div class="step-number">1</div>
+                        <span class="step-text">Crie conta em supabase.com</span>
+                    </div>
+                    <div class="sql-step">
+                        <div class="step-number">2</div>
+                        <span class="step-text">Novo projeto (free tier)</span>
+                    </div>
+                    <div class="sql-step">
+                        <div class="step-number">3</div>
+                        <span class="step-text">SQL Editor → Run o SQL</span>
+                    </div>
+                    <div class="sql-step">
+                        <div class="step-number">4</div>
+                        <span class="step-text">Project Settings → API → copie URL e anon key</span>
+                    </div>
+                </div>
+                <button class="sql-toggle" onclick="toggleSQL()">▼ Mostrar SQL</button>
+                <textarea id="sqlCode" class="sql-textarea" readonly onclick="this.select()">CREATE TABLE IF NOT EXISTS transactions (
+  id          bigserial primary key,
+  type        text    not null,
+  description text    not null,
+  amount      numeric not null,
+  category    text    not null,
+  date        date    not null,
+  added_by    text    not null,
+  created_at  timestamptz default now()
+);
+
+ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "allow_all" ON transactions;
+CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true);</textarea>
+            </div>
+            <div class="form-group-vertical">
+                <div>
+                    <label style="font-size:11px; color:#6B7280; display:block; margin-bottom:4px;">Project URL</label>
+                    <input type="text" class="form-input" id="configUrl" placeholder="https://xxxxx.supabase.co">
+                </div>
+                <div>
+                    <label style="font-size:11px; color:#6B7280; display:block; margin-bottom:4px;">Anon key</label>
+                    <input type="text" class="form-input" id="configKey" placeholder="eyJ...">
+                </div>
+                <div id="configError" class="error-msg"></div>
+                <button class="primary-btn" id="configBtn" onclick="submitConfig()">Conectar →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Transaction Modal -->
+    <div id="addModal" class="modal-overlay">
+        <div class="modal">
+            <h3>Nova Transação</h3>
+            <div class="type-buttons">
+                <button class="type-btn active" data-type="expense" onclick="setTxType('expense')">Despesa</button>
+                <button class="type-btn" data-type="income" onclick="setTxType('income')">Receita</button>
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-input" id="formDesc" placeholder="Descrição">
+            </div>
+            <div class="form-group">
+                <input type="number" class="form-input" id="formAmount" placeholder="Valor (R$)">
+            </div>
+            <div class="form-group">
+                <select class="form-select" id="formCategory">
+                    <option>Alimentação</option>
+                    <option>Transporte</option>
+                    <option>Saúde</option>
+                    <option>Lazer</option>
+                    <option>Casa</option>
+                    <option>Educação</option>
+                    <option>Roupas</option>
+                    <option>Outros</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <input type="date" class="form-input" id="formDate">
+            </div>
+            <div class="form-buttons">
+                <button class="btn-cancel" onclick="closeAddForm()">Cancelar</button>
+                <button class="btn-submit" onclick="submitForm()">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== STATE ==========
+        let currentUser = null;
+        let currentConfig = null;
+        let transactions = [];
+        let formType = 'expense';
+
+        // ========== CONFIG FUNCTIONS ==========
+        function loadConfig() {
+            const cfg = localStorage.getItem('finfamilia_cfg');
+            if (cfg) currentConfig = JSON.parse(cfg);
+            return currentConfig;
+        }
+
+        function saveConfig(cfg) {
+            localStorage.setItem('finfamilia_cfg', JSON.stringify(cfg));
+            currentConfig = cfg;
+        }
+
+        function showConfigScreen() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('configScreen').style.display = 'flex';
+        }
+
+        function toggleSQL() {
+            const btn = event.target;
+            const textarea = document.getElementById('sqlCode');
+            const isShown = textarea.style.display === 'block';
+            textarea.style.display = isShown ? 'none' : 'block';
+            btn.textContent = isShown ? '▼ Mostrar SQL' : '▲ Ocultar SQL';
+        }
+
+        async function submitConfig() {
+            const url = document.getElementById('configUrl').value.trim().replace(/\/$/, '');
+            const key = document.getElementById('configKey').value.trim();
+            const errorDiv = document.getElementById('configError');
+
+            if (!url || !key) {
+                errorDiv.textContent = '❌ Preencha os dois campos.';
+                return;
+            }
+
+            const btn = document.getElementById('configBtn');
+            btn.disabled = true;
+            btn.textContent = 'Conectando...';
+            errorDiv.textContent = '';
+
+            try {
+                const headers = {
+                    'apikey': key,
+                    'Authorization': `Bearer ${key}`,
+                    'Content-Type': 'application/json'
+                };
+                const res = await fetch(`${url}/rest/v1/transactions?limit=1`, { headers });
+                if (!res.ok) throw new Error('Credenciais inválidas ou tabela não existe.');
+                
+                saveConfig({ url, key });
+                document.getElementById('configScreen').style.display = 'none';
+                document.getElementById('loginScreen').style.display = 'flex';
+                alert('✅ Supabase conectado com sucesso!');
+            } catch (e) {
+                errorDiv.textContent = '❌ ' + e.message;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Conectar →';
+            }
+        }
+
+        // ========== LOGIN/LOGOUT ==========
+        function doLogin() {
+            const user = document.getElementById('loginUser').value.toLowerCase();
+            const pass = document.getElementById('loginPass').value;
+            const errorDiv = document.getElementById('loginError');
+
+            if (pass !== 'familia123') {
+                errorDiv.textContent = 'Usuário ou senha incorretos';
+                return;
+            }
+
+            if (user === 'felipe') {
+                currentUser = { username: 'felipe', name: 'Felipe' };
+            } else if (user === 'stephanie') {
+                currentUser = { username: 'stephanie', name: 'Stephanie' };
+            } else {
+                errorDiv.textContent = 'Usuário ou senha incorretos';
+                return;
+            }
+
+            if (!loadConfig()) {
+                showConfigScreen();
+                return;
+            }
+
+            showMainApp();
+        }
+
+        function logout() {
+            currentUser = null;
+            transactions = [];
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('sidebar').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('loginUser').value = '';
+            document.getElementById('loginPass').value = '';
+        }
+
+        // ========== MAIN APP ==========
+        function showMainApp() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('configScreen').style.display = 'none';
+            document.getElementById('sidebar').style.display = 'flex';
+            document.getElementById('mainContent').style.display = 'flex';
+            document.getElementById('avatarLetter').textContent = currentUser.name[0];
+            document.getElementById('userName').textContent = currentUser.name;
+            fetchTransactions();
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            document.getElementById('dashboardTab').style.display = tab === 'dashboard' ? 'block' : 'none';
+            document.getElementById('transactionsTab').style.display = tab === 'transactions' ? 'block' : 'none';
+        }
+
+        // ========== SUPABASE FUNCTIONS ==========
+        function sbHeaders() {
+            return {
+                'apikey': currentConfig.key,
+                'Authorization': `Bearer ${currentConfig.key}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation'
+            };
+        }
+
+        async function fetchTransactions() {
+            try {
+                const res = await fetch(`${currentConfig.url}/rest/v1/transactions?order=created_at.desc`, {
+                    headers: sbHeaders()
+                });
+                if (!res.ok) throw new Error('Erro ao buscar transações');
+                const data = await res.json();
+                transactions = data.map(t => ({ ...t, amount: parseFloat(t.amount) }));
+                renderTransactions();
+                updateCards();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function addTransaction(tx) {
+            try {
+                const res = await fetch(`${currentConfig.url}/rest/v1/transactions`, {
+                    method: 'POST',
+                    headers: sbHeaders(),
+                    body: JSON.stringify(tx)
+                });
+                if (!res.ok) throw new Error('Erro ao salvar');
+                fetchTransactions();
+            } catch (e) {
+                alert('Erro: ' + e.message);
+            }
+        }
+
+        async function deleteTransaction(id) {
+            try {
+                await fetch(`${currentConfig.url}/rest/v1/transactions?id=eq.${id}`, {
+                    method: 'DELETE',
+                    headers: sbHeaders()
+                });
+                fetchTransactions();
+            } catch (e) {
+                alert('Erro ao deletar: ' + e.message);
+            }
+        }
+
+        // ========== UI FUNCTIONS ==========
+        function renderTransactions() {
+            const now = new Date();
+            const mo = now.getMonth();
+            const yr = now.getFullYear();
+
+            const monthTxs = transactions.filter(t => {
+                const d = new Date(t.date);
+                return d.getMonth() === mo && d.getFullYear() === yr;
+            });
+
+            const shortList = monthTxs.slice(0, 10);
+            const html = shortList.map(t => `
+                <div class="tx-item">
+                    <div class="tx-dot" style="background: ${t.type === 'income' ? '#10B981' : '#F43F5E'};"></div>
+                    <div class="tx-info">
+                        <div class="tx-desc">${t.description}</div>
+                        <div class="tx-meta">${t.category} · ${t.added_by}</div>
+                    </div>
+                    <span class="tx-amount" style="color: ${t.type === 'income' ? '#10B981' : '#F43F5E'};">
+                        ${t.type === 'income' ? '+' : '-'}${fmt(t.amount)}
+                    </span>
+                </div>
+            `).join('');
+
+            document.getElementById('txList').innerHTML = html || '<p style="color:#4B5563; text-align:center; padding:24px; font-size:12px;">Nenhuma transação este mês</p>';
+
+            const fullHtml = transactions.map(t => `
+                <div class="tx-item">
+                    <div class="tx-dot" style="background: ${t.type === 'income' ? '#10B981' : '#F43F5E'};"></div>
+                    <div class="tx-info">
+                        <div class="tx-desc">${t.description}</div>
+                        <div class="tx-meta">${t.category} · ${t.added_by} · ${new Date(t.date).toLocaleDateString('pt-BR')}</div>
+                    </div>
+                    <span class="tx-amount" style="color: ${t.type === 'income' ? '#10B981' : '#F43F5E'};">
+                        ${t.type === 'income' ? '+' : '-'}${fmt(t.amount)}
+                    </span>
+                    <button class="tx-delete" onclick="deleteTransaction(${t.id})">✕</button>
+                </div>
+            `).join('');
+
+            document.getElementById('txListFull').innerHTML = fullHtml || '<p style="color:#4B5563; text-align:center; padding:24px; font-size:12px;">Nenhuma transação</p>';
+        }
+
+        function updateCards() {
+            const now = new Date();
+            const mo = now.getMonth();
+            const yr = now.getFullYear();
+
+            const monthTxs = transactions.filter(t => {
+                const d = new Date(t.date);
+                return d.getMonth() === mo && d.getFullYear() === yr;
+            });
+
+            const income = monthTxs.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+            const expense = monthTxs.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+
+            document.getElementById('cardIncome').textContent = fmt(income);
+            document.getElementById('cardExpense').textContent = fmt(expense);
+            document.getElementById('cardBalance').textContent = fmt(income - expense);
+            document.getElementById('cardCount').textContent = monthTxs.length;
+        }
+
+        function fmt(v) {
+            return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function openAddForm() {
+            document.getElementById('addModal').classList.add('show');
+            document.getElementById('formDate').valueAsDate = new Date();
+        }
+
+        function closeAddForm() {
+            document.getElementById('addModal').classList.remove('show');
+        }
+
+        function setTxType(type) {
+            formType = type;
+            document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const categories = type === 'expense' 
+                ? ['Alimentação', 'Transporte', 'Saúde', 'Lazer', 'Casa', 'Educação', 'Roupas', 'Outros']
+                : ['Salário', 'Freelance', 'Investimentos', 'Outros'];
+            
+            const select = document.getElementById('formCategory');
+            select.innerHTML = categories.map(c => `<option>${c}</option>`).join('');
+        }
+
+        async function submitForm() {
+            const desc = document.getElementById('formDesc').value.trim();
+            const amount = parseFloat(document.getElementById('formAmount').value);
+            const category = document.getElementById('formCategory').value;
+            const date = document.getElementById('formDate').value;
+
+            if (!desc || !amount) {
+                alert('Preencha todos os campos');
+                return;
+            }
+
+            await addTransaction({
+                type: formType,
+                description: desc,
+                amount: amount,
+                category: category,
+                date: date,
+                added_by: currentUser.name
+            });
+
+            closeAddForm();
+            document.getElementById('formDesc').value = '';
+            document.getElementById('formAmount').value = '';
+        }
+
+        // ========== INIT ==========
+        window.addEventListener('load', () => {
+            loadConfig();
+            if (currentConfig) {
+                document.getElementById('loginScreen').style.display = 'flex';
+            } else {
+                document.getElementById('loginScreen').style.display = 'flex';
+            }
+        });
+    </script>
+</body>
+</html>
