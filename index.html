@@ -14,7 +14,9 @@
         ::-webkit-scrollbar-track { background: #0B0F1A; }
         ::-webkit-scrollbar-thumb { background: #1E2A3A; border-radius: 2px; }
 
-        .sidebar { width: 200px; background: #0F1624; border-right: 1px solid #1A2333; padding: 20px 10px; display: flex; flex-direction: column; gap: 2px; }
+        /* Sidebar */
+        .sidebar { width: 200px; background: #0F1624; border-right: 1px solid #1A2333; padding: 20px 10px; display: flex; flex-direction: column; gap: 2px; position: fixed; height: 100vh; left: 0; top: 0; transition: transform 0.3s ease; z-index: 1000; }
+        .sidebar.hidden { transform: translateX(-100%); }
         .logo { display: flex; align-items: center; gap: 8px; padding: 0 13px 20px; border-bottom: 1px solid #1A2333; margin-bottom: 12px; font-size: 15px; font-weight: 800; color: #F59E0B; }
         .nav-btn { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 7px; border: none; background: transparent; color: #6B7280; cursor: pointer; font-size: 13px; font-weight: 500; width: 100%; text-align: left; transition: all 0.15s; }
         .nav-btn:hover { background: #1A2333; color: #F59E0B; }
@@ -24,24 +26,44 @@
         .user-info { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
         .logout-btn { width: 100%; padding: 7px; border: 1px solid #1A2333; border-radius: 6px; background: transparent; color: #6B7280; cursor: pointer; font-size: 11px; }
 
-        main { flex: 1; overflow: auto; padding: 20px; background: #0B0F1A; color: #F9FAFB; }
-        .content { max-width: 1000px; margin: 0 auto; }
-        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+        /* Hamburger */
+        .hamburger { display: none; position: fixed; top: 16px; left: 16px; z-index: 1001; background: #F59E0B; border: none; border-radius: 6px; padding: 8px 12px; cursor: pointer; font-size: 20px; color: #0B0F1A; }
+        .hamburger.show { display: block; }
+
+        /* Sidebar Overlay */
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; }
+        .sidebar-overlay.show { display: block; }
+
+        /* Main */
+        main { flex: 1; overflow: auto; padding: 20px; background: #0B0F1A; color: #F9FAFB; margin-left: 200px; transition: margin-left 0.3s ease; }
+        .content { width: 100%; }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; gap: 16px; flex-wrap: wrap; }
         .header h2 { font-size: 19px; font-weight: 800; color: #F9FAFB; letter-spacing: -0.3px; }
-        .add-btn { padding: 8px 16px; background: #F59E0B; border: none; border-radius: 7px; color: #0B0F1A; font-weight: 700; cursor: pointer; font-size: 13px; }
+        .header-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .add-btn { padding: 8px 16px; background: #F59E0B; border: none; border-radius: 7px; color: #0B0F1A; font-weight: 700; cursor: pointer; font-size: 13px; white-space: nowrap; }
         .add-btn:hover { opacity: 0.9; }
 
-        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+        /* Date Filter */
+        .date-filter { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .filter-btn { padding: 8px 12px; background: transparent; border: 1px solid #1A2333; border-radius: 6px; color: #6B7280; cursor: pointer; font-size: 12px; transition: all 0.15s; }
+        .filter-btn:hover { border-color: #F59E0B; color: #F59E0B; }
+        .filter-btn.active { background: #F59E0B; color: #0B0F1A; border-color: #F59E0B; }
+        .filter-input { padding: 8px 12px; background: #0B0F1A; border: 1px solid #1A2333; border-radius: 6px; color: #F9FAFB; font-size: 12px; outline: none; }
+
+        /* Cards */
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; width: 100%; }
         .card { background: #0F1624; border-radius: 11px; padding: 16px; border: 1px solid #1A2333; }
         .card.summary { border-top: 3px solid; }
         .card-label { font-size: 10px; color: #6B7280; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; }
-        .card-value { font-size: 21px; font-weight: 800; letter-spacing: -0.5px; }
+        .card-value { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
 
-        .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+        /* Charts */
+        .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 14px; margin-bottom: 16px; width: 100%; }
         .chart-card { background: #0F1624; border-radius: 11px; padding: 16px; border: 1px solid #1A2333; }
         .chart-title { font-size: 10px; color: #6B7280; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; }
         .chart-container { position: relative; height: 250px; margin-bottom: 8px; }
 
+        /* Transactions */
         .tx-list { display: flex; flex-direction: column; gap: 0; }
         .tx-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #111827; }
         .tx-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
@@ -51,7 +73,8 @@
         .tx-amount { font-size: 13px; font-weight: 700; flex-shrink: 0; }
         .tx-delete { background: transparent; border: none; color: #374151; cursor: pointer; font-size: 12px; padding: 2px 6px; }
 
-        .chat-container { background: #0F1624; border-radius: 12px; border: 1px solid #1A2333; overflow: hidden; display: flex; flex-direction: column; height: 60vh; }
+        /* Chat */
+        .chat-container { background: #0F1624; border-radius: 12px; border: 1px solid #1A2333; overflow: hidden; display: flex; flex-direction: column; height: 60vh; width: 100%; }
         .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
         .chat-bubble { max-width: 73%; padding: 10px 13px; border-radius: 11px; font-size: 13px; line-height: 1.65; white-space: pre-wrap; }
         .chat-user { align-self: flex-end; background: #F59E0B; color: #0B0F1A; font-weight: 500; }
@@ -64,6 +87,7 @@
         .chat-suggestions { padding: 7px 13px; border-top: 1px solid #1A2333; display: flex; gap: 6px; flex-wrap: wrap; background: #0B0F1A; }
         .chat-suggestion { padding: 3px 9px; background: transparent; border: 1px solid #1A2333; border-radius: 20px; color: #6B7280; font-size: 10px; cursor: pointer; }
 
+        /* Modal */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.78); display: none; align-items: center; justify-content: center; z-index: 999; }
         .modal-overlay.show { display: flex; }
         .modal { background: #0F1624; border-radius: 15px; padding: 24px; width: 340px; border: 1px solid #1A2333; }
@@ -78,9 +102,10 @@
         .btn-cancel { flex: 1; padding: 10px; border: 1px solid #1A2333; border-radius: 7px; background: transparent; color: #6B7280; cursor: pointer; font-size: 13px; }
         .btn-submit { flex: 1; padding: 10px; border: none; border-radius: 7px; background: #F59E0B; color: #0B0F1A; font-weight: 700; cursor: pointer; font-size: 13px; }
 
-        .page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #0B0F1A; }
-        .login-card { background: #0F1624; border-radius: 15px; padding: 32px; width: 330px; border: 1px solid #1A2333; }
-        .config-card { background: #0F1624; border-radius: 15px; padding: 32px; width: 430px; border: 1px solid #1A2333; }
+        /* Login/Config */
+        .page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #0B0F1A; padding: 20px; }
+        .login-card { background: #0F1624; border-radius: 15px; padding: 32px; width: 100%; max-width: 330px; border: 1px solid #1A2333; margin: 0 auto; }
+        .config-card { background: #0F1624; border-radius: 15px; padding: 32px; width: 100%; max-width: 430px; border: 1px solid #1A2333; margin: 0 auto; }
         .card-header { text-align: center; margin-bottom: 24px; }
         .card-title { font-size: 19px; font-weight: 800; color: #F9FAFB; margin-top: 8px; }
         .card-subtitle { font-size: 12px; color: #6B7280; margin-top: 5px; }
@@ -96,13 +121,38 @@
         .sql-toggle { margin-top: 6px; padding: 6px 12px; background: transparent; border: 1px solid #374151; border-radius: 6px; color: #9CA3AF; font-size: 11px; cursor: pointer; width: 100%; }
         .sql-textarea { width: 100%; margin-top: 9px; padding: 10px; background: #0B0F1A; border: 1px solid #1A2333; border-radius: 7px; color: #10B981; font-size: 11px; font-family: monospace; height: 160px; resize: none; }
 
-        @media (max-width: 900px) {
+        /* Mobile */
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; }
+            main { margin-left: 0; padding: 16px; }
+            .hamburger.show { display: block; }
+            .sidebar.hidden { transform: translateX(-100%); }
+            .header { flex-direction: column; }
+            .header-actions { width: 100%; flex-direction: column; }
+            .date-filter { width: 100%; }
             .charts-grid { grid-template-columns: 1fr; }
+            .cards-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+            .card-value { font-size: 18px; }
+            .add-btn, .filter-btn { font-size: 12px; padding: 6px 12px; }
+        }
+
+        @media (max-width: 480px) {
+            main { padding: 12px; }
+            .modal { width: 90%; }
+            .card-value { font-size: 16px; }
+            .header h2 { font-size: 16px; }
         }
     </style>
 </head>
 <body>
-    <aside class="sidebar" id="sidebar" style="display:none;">
+    <!-- Hamburger -->
+    <button class="hamburger show" id="hamburger" onclick="toggleSidebar()">☰</button>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar hidden" id="sidebar">
         <div class="logo">💰 FinFamília</div>
         <button class="nav-btn active" onclick="switchTab('dashboard')">◈ Dashboard</button>
         <button class="nav-btn" onclick="switchTab('transactions')">↕ Transações</button>
@@ -116,14 +166,28 @@
         </div>
     </aside>
 
+    <!-- Main -->
     <main id="mainContent" style="display:none;">
         <div class="content">
+            <!-- Dashboard Tab -->
             <div id="dashboardTab">
                 <div class="header">
                     <h2>Dashboard</h2>
-                    <button class="add-btn" onclick="openAddForm()">+ Adicionar</button>
+                    <div class="header-actions">
+                        <button class="add-btn" onclick="openAddForm()">+ Adicionar</button>
+                    </div>
                 </div>
 
+                <!-- Date Filter -->
+                <div class="date-filter" style="margin-bottom: 16px;">
+                    <button class="filter-btn active" data-range="month" onclick="setDateRange('month')">Este Mês</button>
+                    <button class="filter-btn" data-range="week" onclick="setDateRange('week')">Esta Semana</button>
+                    <button class="filter-btn" data-range="today" onclick="setDateRange('today')">Hoje</button>
+                    <button class="filter-btn" data-range="yesterday" onclick="setDateRange('yesterday')">Ontem</button>
+                    <input type="date" class="filter-input" id="customDate" onchange="setDateRange('custom')">
+                </div>
+
+                <!-- Cards -->
                 <div class="cards-grid">
                     <div class="card summary" style="border-top-color: #10B981;">
                         <div class="card-label">Receitas</div>
@@ -143,9 +207,10 @@
                     </div>
                 </div>
 
+                <!-- Charts -->
                 <div class="charts-grid">
                     <div class="chart-card">
-                        <div class="chart-title">Receitas vs Despesas (6 meses)</div>
+                        <div class="chart-title">Receitas vs Despesas</div>
                         <div class="chart-container">
                             <canvas id="barChart"></canvas>
                         </div>
@@ -158,18 +223,22 @@
                     </div>
                 </div>
 
+                <!-- Transactions -->
                 <div class="card">
-                    <div style="font-size: 10px; color: #6B7280; font-weight: 700; text-transform: uppercase; margin-bottom: 12px;">Transações Recentes</div>
+                    <div style="font-size: 10px; color: #6B7280; font-weight: 700; text-transform: uppercase; margin-bottom: 12px;">Transações</div>
                     <div class="tx-list" id="txList">
-                        <p style="color:#4B5563; text-align:center; padding:24px; font-size:12px;">Nenhuma transação ainda</p>
+                        <p style="color:#4B5563; text-align:center; padding:24px; font-size:12px;">Nenhuma transação</p>
                     </div>
                 </div>
             </div>
 
+            <!-- Transactions Tab -->
             <div id="transactionsTab" style="display:none;">
                 <div class="header">
                     <h2>Transações</h2>
-                    <button class="add-btn" onclick="openAddForm()">+ Adicionar</button>
+                    <div class="header-actions">
+                        <button class="add-btn" onclick="openAddForm()">+ Adicionar</button>
+                    </div>
                 </div>
                 <div class="card">
                     <div class="tx-list" id="txListFull">
@@ -178,28 +247,30 @@
                 </div>
             </div>
 
+            <!-- Chat Tab -->
             <div id="chatTab" style="display:none;">
                 <div class="header">
                     <h2>Assistente IA ✦</h2>
                 </div>
                 <div class="chat-container">
                     <div class="chat-messages" id="chatMessages">
-                        <div class="chat-bubble chat-bot">Olá Felipe e Stephanie! 💰<br><br>Sou sua assistente financeira.<br><br>Tente: "Gastei R$50 no mercado" ou "Como estão os gastos?"</div>
+                        <div class="chat-bubble chat-bot">Olá Felipe e Stephanie! 💰<br><br>Sou sua assistente financeira.<br><br>Tente: "Gastei R$50 no mercado"</div>
                     </div>
                     <div class="chat-input-area">
-                        <input type="text" class="chat-input" id="chatInput" placeholder="Ex: Gastei R$45 no almoço..." onkeydown="if(event.key==='Enter') sendChat()">
+                        <input type="text" class="chat-input" id="chatInput" placeholder="Ex: Gastei R$45..." onkeydown="if(event.key==='Enter') sendChat()">
                         <button class="chat-send" onclick="sendChat()">➤</button>
                     </div>
                     <div class="chat-suggestions">
-                        <button class="chat-suggestion" onclick="setChatInput('Gastei R$80 no mercado')">Gastei R$80 no mercado</button>
-                        <button class="chat-suggestion" onclick="setChatInput('Como estão os gastos?')">Como estão os gastos?</button>
-                        <button class="chat-suggestion" onclick="setChatInput('Recebi meu salário')">Recebi meu salário</button>
+                        <button class="chat-suggestion" onclick="setChatInput('Gastei R$80 no mercado')">Gastei R$80</button>
+                        <button class="chat-suggestion" onclick="setChatInput('Como estão os gastos?')">Gastos?</button>
+                        <button class="chat-suggestion" onclick="setChatInput('Recebi meu salário')">Salário</button>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
+    <!-- Login Screen -->
     <div id="loginScreen" class="page">
         <div class="login-card">
             <div class="card-header">
@@ -208,22 +279,22 @@
                 <p class="card-subtitle">Controle financeiro do casal</p>
             </div>
             <div class="form-group-vertical">
-                <input type="text" class="form-input" id="loginUser" placeholder="Usuário (felipe ou stephanie)">
+                <input type="text" class="form-input" id="loginUser" placeholder="Usuário">
                 <input type="password" class="form-input" id="loginPass" placeholder="Senha">
                 <div id="loginError" class="error-msg"></div>
                 <button class="primary-btn" onclick="doLogin()">Entrar →</button>
-                <p style="font-size:10px; color:#374151; text-align:center;">Senha: <b style="color:#6B7280;">familia123</b></p>
             </div>
-            <button onclick="showConfigScreen()" style="margin-top:18px; background:transparent; border:none; color:#374151; font-size:11px; cursor:pointer; width:100%;">⚙ Configurar Supabase</button>
+            <button onclick="showConfigScreen()" style="margin-top:18px; background:transparent; border:none; color:#374151; font-size:11px; cursor:pointer; width:100%;">⚙ Configurar</button>
         </div>
     </div>
 
+    <!-- Config Screen -->
     <div id="configScreen" class="page" style="display:none;">
         <div class="config-card">
             <div class="card-header">
                 <div style="font-size:38px; margin-bottom:8px;">🔗</div>
                 <h1 class="card-title">Configurar Supabase</h1>
-                <p class="card-subtitle">Sincronize Felipe e Stephanie em tempo real</p>
+                <p class="card-subtitle">Sincronize dados em tempo real</p>
             </div>
             <div class="sql-box">
                 <div class="sql-title">Setup em 5 minutos</div>
@@ -234,15 +305,15 @@
                     </div>
                     <div class="sql-step">
                         <div class="step-number">2</div>
-                        <span class="step-text">Novo projeto (free tier)</span>
+                        <span class="step-text">Novo projeto (free)</span>
                     </div>
                     <div class="sql-step">
                         <div class="step-number">3</div>
-                        <span class="step-text">SQL Editor → Run o SQL</span>
+                        <span class="step-text">SQL Editor → Run</span>
                     </div>
                     <div class="sql-step">
                         <div class="step-number">4</div>
-                        <span class="step-text">Project Settings → API → copie URL e anon key</span>
+                        <span class="step-text">Project Settings → API</span>
                     </div>
                 </div>
                 <button class="sql-toggle" onclick="toggleSQL()">▼ Mostrar SQL</button>
@@ -263,26 +334,23 @@ DROP POLICY IF EXISTS "allow_all" ON transactions;
 CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true);</textarea>
             </div>
             <div class="form-group-vertical">
-                <div>
-                    <label style="font-size:11px; color:#6B7280; display:block; margin-bottom:4px;">Project URL</label>
-                    <input type="text" class="form-input" id="configUrl" placeholder="https://xxxxx.supabase.co">
-                </div>
-                <div>
-                    <label style="font-size:11px; color:#6B7280; display:block; margin-bottom:4px;">Anon key</label>
-                    <input type="text" class="form-input" id="configKey" placeholder="eyJ...">
-                </div>
-                <div id="configError" class="error-msg"></div>
-                <button class="primary-btn" id="configBtn" onclick="submitConfig()">Conectar →</button>
+                <label style="font-size:11px; color:#6B7280;">Project URL</label>
+                <input type="text" class="form-input" id="configUrl" placeholder="https://xxxxx.supabase.co">
+                <label style="font-size:11px; color:#6B7280; margin-top:10px;">Anon key</label>
+                <input type="text" class="form-input" id="configKey" placeholder="eyJ...">
+                <div id="configError" class="error-msg" style="margin-top:10px;"></div>
+                <button class="primary-btn" id="configBtn" onclick="submitConfig()" style="margin-top:10px;">Conectar →</button>
             </div>
         </div>
     </div>
 
+    <!-- Add Modal -->
     <div id="addModal" class="modal-overlay">
         <div class="modal">
             <h3>Nova Transação</h3>
             <div class="type-buttons">
-                <button class="type-btn active" data-type="expense" onclick="setTxType('expense')">Despesa</button>
-                <button class="type-btn" data-type="income" onclick="setTxType('income')">Receita</button>
+                <button class="type-btn active" onclick="setTxType('expense')">Despesa</button>
+                <button class="type-btn" onclick="setTxType('income')">Receita</button>
             </div>
             <div class="form-group">
                 <input type="text" class="form-input" id="formDesc" placeholder="Descrição">
@@ -319,6 +387,8 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
         let formType = 'expense';
         let barChart = null;
         let pieChart = null;
+        let dateRange = 'month';
+        let customDateValue = null;
 
         function loadConfig() {
             const cfg = localStorage.getItem('finfamilia_cfg');
@@ -329,6 +399,20 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
         function saveConfig(cfg) {
             localStorage.setItem('finfamilia_cfg', JSON.stringify(cfg));
             currentConfig = cfg;
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('hidden');
+            overlay.classList.toggle('show');
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.add('hidden');
+            overlay.classList.remove('show');
         }
 
         function showConfigScreen() {
@@ -366,12 +450,12 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
                     'Content-Type': 'application/json'
                 };
                 const res = await fetch(`${url}/rest/v1/transactions?limit=1`, { headers });
-                if (!res.ok) throw new Error('Credenciais inválidas ou tabela não existe.');
+                if (!res.ok) throw new Error('Credenciais inválidas.');
                 
                 saveConfig({ url, key });
                 document.getElementById('configScreen').style.display = 'none';
                 document.getElementById('loginScreen').style.display = 'flex';
-                alert('✅ Supabase conectado com sucesso!');
+                alert('✅ Conectado!');
             } catch (e) {
                 errorDiv.textContent = '❌ ' + e.message;
             } finally {
@@ -411,7 +495,8 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
             currentUser = null;
             transactions = [];
             document.getElementById('mainContent').style.display = 'none';
-            document.getElementById('sidebar').style.display = 'none';
+            document.getElementById('sidebar').classList.add('hidden');
+            document.getElementById('sidebarOverlay').classList.remove('show');
             document.getElementById('loginScreen').style.display = 'flex';
             document.getElementById('loginUser').value = '';
             document.getElementById('loginPass').value = '';
@@ -420,7 +505,7 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
         function showMainApp() {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('configScreen').style.display = 'none';
-            document.getElementById('sidebar').style.display = 'flex';
+            document.getElementById('sidebar').classList.remove('hidden');
             document.getElementById('mainContent').style.display = 'flex';
             document.getElementById('avatarLetter').textContent = currentUser.name[0];
             document.getElementById('userName').textContent = currentUser.name;
@@ -431,6 +516,7 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
         function switchTab(tab) {
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
+            closeSidebar();
 
             document.getElementById('dashboardTab').style.display = tab === 'dashboard' ? 'block' : 'none';
             document.getElementById('transactionsTab').style.display = tab === 'transactions' ? 'block' : 'none';
@@ -442,6 +528,50 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
                     if (pieChart) pieChart.resize();
                 }, 100);
             }
+        }
+
+        function setDateRange(range) {
+            dateRange = range;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            if (range === 'custom') {
+                customDateValue = document.getElementById('customDate').value;
+            } else {
+                document.querySelector(`[data-range="${range}"]`).classList.add('active');
+                customDateValue = null;
+            }
+            updateCards();
+            updateCharts();
+            renderTransactions();
+        }
+
+        function getFilteredTransactions() {
+            const now = new Date();
+            let start = new Date();
+            let end = new Date();
+
+            if (dateRange === 'today') {
+                start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+            } else if (dateRange === 'yesterday') {
+                start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+                end = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            } else if (dateRange === 'week') {
+                const day = now.getDay();
+                start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day);
+                end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (7 - day));
+            } else if (dateRange === 'month') {
+                start = new Date(now.getFullYear(), now.getMonth(), 1);
+                end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+            } else if (dateRange === 'custom' && customDateValue) {
+                start = new Date(customDateValue);
+                end = new Date(customDateValue);
+                end.setDate(end.getDate() + 1);
+            }
+
+            return transactions.filter(t => {
+                const tDate = new Date(t.date);
+                return tDate >= start && tDate < end;
+            });
         }
 
         function sbHeaders() {
@@ -458,7 +588,7 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
                 const res = await fetch(`${currentConfig.url}/rest/v1/transactions?order=created_at.desc`, {
                     headers: sbHeaders()
                 });
-                if (!res.ok) throw new Error('Erro ao buscar transações');
+                if (!res.ok) throw new Error('Erro ao buscar');
                 const data = await res.json();
                 transactions = data.map(t => ({ ...t, amount: parseFloat(t.amount) }));
                 renderTransactions();
@@ -496,32 +626,9 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
         }
 
         function renderTransactions() {
-            const now = new Date();
-            const mo = now.getMonth();
-            const yr = now.getFullYear();
+            const filtered = getFilteredTransactions();
 
-            const monthTxs = transactions.filter(t => {
-                const d = new Date(t.date);
-                return d.getMonth() === mo && d.getFullYear() === yr;
-            });
-
-            const shortList = monthTxs.slice(0, 10);
-            const html = shortList.map(t => `
-                <div class="tx-item">
-                    <div class="tx-dot" style="background: ${t.type === 'income' ? '#10B981' : '#F43F5E'};"></div>
-                    <div class="tx-info">
-                        <div class="tx-desc">${t.description}</div>
-                        <div class="tx-meta">${t.category} · ${t.added_by}</div>
-                    </div>
-                    <span class="tx-amount" style="color: ${t.type === 'income' ? '#10B981' : '#F43F5E'};">
-                        ${t.type === 'income' ? '+' : '-'}${fmt(t.amount)}
-                    </span>
-                </div>
-            `).join('');
-
-            document.getElementById('txList').innerHTML = html || '<p style="color:#4B5563; text-align:center; padding:24px; font-size:12px;">Nenhuma transação este mês</p>';
-
-            const fullHtml = transactions.map(t => `
+            const html = filtered.map(t => `
                 <div class="tx-item">
                     <div class="tx-dot" style="background: ${t.type === 'income' ? '#10B981' : '#F43F5E'};"></div>
                     <div class="tx-info">
@@ -535,58 +642,37 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
                 </div>
             `).join('');
 
-            document.getElementById('txListFull').innerHTML = fullHtml || '<p style="color:#4B5563; text-align:center; padding:24px; font-size:12px;">Nenhuma transação</p>';
+            document.getElementById('txList').innerHTML = html || '<p style="color:#4B5563; text-align:center; padding:24px; font-size:12px;">Nenhuma transação</p>';
+            document.getElementById('txListFull').innerHTML = html || '<p style="color:#4B5563; text-align:center; padding:24px; font-size:12px;">Nenhuma transação</p>';
         }
 
         function updateCards() {
-            const now = new Date();
-            const mo = now.getMonth();
-            const yr = now.getFullYear();
-
-            const monthTxs = transactions.filter(t => {
-                const d = new Date(t.date);
-                return d.getMonth() === mo && d.getFullYear() === yr;
-            });
-
-            const income = monthTxs.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
-            const expense = monthTxs.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+            const filtered = getFilteredTransactions();
+            const income = filtered.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+            const expense = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
 
             document.getElementById('cardIncome').textContent = fmt(income);
             document.getElementById('cardExpense').textContent = fmt(expense);
             document.getElementById('cardBalance').textContent = fmt(income - expense);
-            document.getElementById('cardCount').textContent = monthTxs.length;
+            document.getElementById('cardCount').textContent = filtered.length;
         }
 
         function updateCharts() {
-            const now = new Date();
-            const mo = now.getMonth();
-            const yr = now.getFullYear();
-
-            const monthTxs = transactions.filter(t => {
-                const d = new Date(t.date);
-                return d.getMonth() === mo && d.getFullYear() === yr;
-            });
-
+            const filtered = getFilteredTransactions();
+            
             const barData = [];
             for (let i = 5; i >= 0; i--) {
-                const d = new Date(yr, mo - i, 1);
-                const m = d.getMonth();
-                const y = d.getFullYear();
-                const mt = transactions.filter(t => {
-                    const td = new Date(t.date);
-                    return td.getMonth() === m && td.getFullYear() === y;
-                });
-                const inc = mt.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
-                const exp = mt.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
-                barData.push({
-                    month: d.toLocaleString('pt-BR', { month: 'short' }),
-                    receitas: inc,
-                    despesas: exp
-                });
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const dateStr = d.toISOString().split('T')[0];
+                const dayTxs = filtered.filter(t => t.date === dateStr);
+                const inc = dayTxs.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+                const exp = dayTxs.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+                barData.push({ month: d.toLocaleDateString('pt-BR', { weekday: 'short' }), receitas: inc, despesas: exp });
             }
 
             const catData = {};
-            monthTxs.filter(t => t.type === 'expense').forEach(t => {
+            filtered.filter(t => t.type === 'expense').forEach(t => {
                 catData[t.category] = (catData[t.category] || 0) + t.amount;
             });
 
@@ -600,18 +686,8 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
                 data: {
                     labels: barData.map(d => d.month),
                     datasets: [
-                        {
-                            label: 'Receitas',
-                            data: barData.map(d => d.receitas),
-                            backgroundColor: '#10B981',
-                            borderRadius: 3
-                        },
-                        {
-                            label: 'Despesas',
-                            data: barData.map(d => d.despesas),
-                            backgroundColor: '#F43F5E',
-                            borderRadius: 3
-                        }
+                        { label: 'Receitas', data: barData.map(d => d.receitas), backgroundColor: '#10B981', borderRadius: 3 },
+                        { label: 'Despesas', data: barData.map(d => d.despesas), backgroundColor: '#F43F5E', borderRadius: 3 }
                     ]
                 },
                 options: {
@@ -632,12 +708,7 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
                 type: 'doughnut',
                 data: {
                     labels: pieLabels,
-                    datasets: [{
-                        data: pieValues,
-                        backgroundColor: colors.slice(0, pieLabels.length),
-                        borderColor: '#0F1624',
-                        borderWidth: 2
-                    }]
+                    datasets: [{ data: pieValues, backgroundColor: colors.slice(0, pieLabels.length), borderColor: '#0F1624', borderWidth: 2 }]
                 },
                 options: {
                     responsive: true,
@@ -664,13 +735,10 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
             formType = type;
             document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-            
-            const categories = type === 'expense' 
+            const cats = type === 'expense' 
                 ? ['Alimentação', 'Transporte', 'Saúde', 'Lazer', 'Casa', 'Educação', 'Roupas', 'Outros']
                 : ['Salário', 'Freelance', 'Investimentos', 'Outros'];
-            
-            const select = document.getElementById('formCategory');
-            select.innerHTML = categories.map(c => `<option>${c}</option>`).join('');
+            document.getElementById('formCategory').innerHTML = cats.map(c => `<option>${c}</option>`).join('');
         }
 
         async function submitForm() {
@@ -684,15 +752,7 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
                 return;
             }
 
-            await addTransaction({
-                type: formType,
-                description: desc,
-                amount: amount,
-                category: category,
-                date: date,
-                added_by: currentUser.name
-            });
-
+            await addTransaction({ type: formType, description: desc, amount, category, date, added_by: currentUser.name });
             closeAddForm();
             document.getElementById('formDesc').value = '';
             document.getElementById('formAmount').value = '';
@@ -707,41 +767,28 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
             if (!input) return;
 
             document.getElementById('chatInput').value = '';
-            
             const msgDiv = document.getElementById('chatMessages');
             const userBubble = document.createElement('div');
             userBubble.className = 'chat-bubble chat-user';
             userBubble.textContent = input;
             msgDiv.appendChild(userBubble);
-            msgDiv.scrollTop = msgDiv.scrollHeight;
 
             try {
-                const now = new Date();
-                const mo = now.getMonth();
-                const yr = now.getFullYear();
-                const monthTxs = transactions.filter(t => {
-                    const d = new Date(t.date);
-                    return d.getMonth() === mo && d.getFullYear() === yr;
-                });
-                const income = monthTxs.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
-                const expense = monthTxs.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+                const filtered = getFilteredTransactions();
+                const income = filtered.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+                const expense = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
 
-                const sys = `Você é assistente financeira do casal Felipe e Stephanie. Fale em PT-BR informal.
-Dados do mês: Receitas ${fmt(income)} | Despesas ${fmt(expense)} | Saldo ${fmt(income - expense)}
+                const sys = `Você é assistente financeira do casal Felipe e Stephanie.
+Dados: Receitas ${fmt(income)} | Despesas ${fmt(expense)} | Saldo ${fmt(income - expense)}
 Categorias: Alimentação, Transporte, Saúde, Lazer, Casa, Educação, Roupas, Outros
 REGRA: Se registrar gasto, responda SOMENTE com JSON:
 {"message":"confirmação","action":{"type":"add_transaction","transaction":{"type":"expense|income","description":"texto","amount":número,"category":"cat","date":"YYYY-MM-DD"}}}
-Senão, responda em texto curto e amigável.`;
+Senão, responda em texto curto.`;
 
                 const res = await fetch('https://api.anthropic.com/v1/messages', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        model: 'claude-sonnet-4-20250514',
-                        max_tokens: 500,
-                        system: sys,
-                        messages: [{ role: 'user', content: input }]
-                    })
+                    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 500, system: sys, messages: [{ role: 'user', content: input }] })
                 });
 
                 const data = await res.json();
@@ -751,14 +798,7 @@ Senão, responda em texto curto e amigável.`;
                     const p = JSON.parse(raw.trim());
                     if (p.action?.type === 'add_transaction') {
                         const tx = p.action.transaction;
-                        await addTransaction({
-                            type: tx.type,
-                            description: tx.description,
-                            amount: tx.amount,
-                            category: tx.category,
-                            date: tx.date,
-                            added_by: currentUser.name
-                        });
+                        await addTransaction({ type: tx.type, description: tx.description, amount: tx.amount, category: tx.category, date: tx.date, added_by: currentUser.name });
                         const bubble = document.createElement('div');
                         bubble.className = 'chat-bubble chat-bot';
                         bubble.innerHTML = `<span class="action-badge">✓ SALVO</span>${p.message}`;
@@ -778,7 +818,7 @@ Senão, responda em texto curto e amigável.`;
             } catch (e) {
                 const bubble = document.createElement('div');
                 bubble.className = 'chat-bubble chat-bot';
-                bubble.textContent = 'Erro de conexão com IA. Mas você pode adicionar gastos manualmente!';
+                bubble.textContent = 'Erro de conexão com IA.';
                 msgDiv.appendChild(bubble);
             }
 
