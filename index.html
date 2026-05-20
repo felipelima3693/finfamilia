@@ -962,15 +962,14 @@ Se for apenas pergunta ou conversa normal, responda em texto amigável normal SE
                 msgDiv.appendChild(loadingBubble);
                 msgDiv.scrollTop = msgDiv.scrollHeight;
 
-                const res = await fetch('https://api.anthropic.com/v1/messages', {
+                // Call Vercel serverless function instead of Anthropic API directly
+                const res = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
                         'x-api-key': apiKey
                     },
                     body: JSON.stringify({
-                        model: 'claude-sonnet-4-20250514',
-                        max_tokens: 500,
                         system: sys,
                         messages: [{ role: 'user', content: input }]
                     })
@@ -986,7 +985,7 @@ Se for apenas pergunta ou conversa normal, responda em texto amigável normal SE
                         localStorage.removeItem('anthropic_api_key');
                         const bubble = document.createElement('div');
                         bubble.className = 'chat-bubble chat-bot';
-                        bubble.textContent = '❌ Chave de API inválida! Tente novamente (será pedida na próxima mensagem).';
+                        bubble.textContent = '❌ Chave de API inválida ou expirada! Tente novamente.';
                         msgDiv.appendChild(bubble);
                     } else {
                         const bubble = document.createElement('div');
