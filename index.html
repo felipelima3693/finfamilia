@@ -7,153 +7,287 @@
     <script src="https://unpkg.com/chart.js@3.9.1/dist/chart.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&display=swap');
+        
+        :root {
+            --primary-blue: #00D9FF;
+            --secondary-blue: #0099CC;
+            --dark-bg: #0A0E27;
+            --card-bg: #0F1A3D;
+            --accent-gold: #FFD700;
+            --text-light: #E0E6FF;
+            --text-muted: #7A8FB0;
+            --border-color: #1A2E5C;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
-        html, body { width: 100%; height: 100%; background: #0B0F1A; }
+        html, body { width: 100%; height: 100%; background: var(--dark-bg); }
         body { display: flex; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #0B0F1A; }
-        ::-webkit-scrollbar-thumb { background: #1E2A3A; border-radius: 2px; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--dark-bg); }
+        ::-webkit-scrollbar-thumb { background: var(--primary-blue); border-radius: 3px; }
 
         /* Sidebar */
-        .sidebar { width: 200px; background: #0F1624; border-right: 1px solid #1A2333; padding: 20px 10px; display: flex; flex-direction: column; gap: 2px; position: fixed; height: 100vh; left: 0; top: 0; transition: transform 0.3s ease; z-index: 900; }
+        .sidebar { 
+            width: 200px; background: linear-gradient(135deg, var(--card-bg), var(--dark-bg)); 
+            border-right: 2px solid var(--primary-blue); padding: 20px 10px; display: flex; 
+            flex-direction: column; gap: 2px; position: fixed; height: 100vh; left: 0; top: 0; 
+            transition: transform 0.3s ease; z-index: 900; box-shadow: 0 0 30px rgba(0, 217, 255, 0.1);
+        }
         .sidebar.hidden { transform: translateX(-100%); }
-        .logo { display: flex; align-items: center; gap: 8px; padding: 0 13px 20px; border-bottom: 1px solid #1A2333; margin-bottom: 12px; font-size: 15px; font-weight: 800; color: #F59E0B; }
-        .nav-btn { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 7px; border: none; background: transparent; color: #6B7280; cursor: pointer; font-size: 13px; font-weight: 500; width: 100%; text-align: left; transition: all 0.15s; }
-        .nav-btn:hover { background: #1A2333; color: #F59E0B; }
-        .nav-btn.active { background: #1A2333; color: #F59E0B; }
-        .user-section { margin-top: auto; padding-top: 14px; border-top: 1px solid #1A2333; }
-        .avatar { width: 27px; height: 27px; border-radius: 50%; background: #F59E0B; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #0B0F1A; }
+        .logo { 
+            display: flex; align-items: center; gap: 8px; padding: 0 13px 20px; 
+            border-bottom: 2px solid var(--primary-blue); margin-bottom: 12px; 
+            font-size: 15px; font-weight: 800; color: var(--primary-blue); 
+            text-shadow: 0 0 10px var(--primary-blue); position: relative; z-index: 10;
+        }
+        .nav-btn { 
+            display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 7px; 
+            border: 1px solid transparent; background: transparent; color: var(--text-muted); 
+            cursor: pointer; font-size: 13px; font-weight: 500; width: 100%; text-align: left; 
+            transition: all 0.2s;
+        }
+        .nav-btn:hover { background: rgba(0, 217, 255, 0.1); color: var(--primary-blue); border-color: var(--primary-blue); }
+        .nav-btn.active { background: rgba(0, 217, 255, 0.15); color: var(--primary-blue); border-color: var(--primary-blue); box-shadow: 0 0 10px rgba(0, 217, 255, 0.3); }
+        .user-section { margin-top: auto; padding-top: 14px; border-top: 2px solid var(--border-color); }
+        .avatar { 
+            width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue)); 
+            display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; 
+            color: var(--dark-bg); box-shadow: 0 0 15px var(--primary-blue);
+        }
         .user-info { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-        .logout-btn { width: 100%; padding: 7px; border: 1px solid #1A2333; border-radius: 6px; background: transparent; color: #6B7280; cursor: pointer; font-size: 11px; }
+        .logout-btn { 
+            width: 100%; padding: 7px; border: 1px solid var(--primary-blue); border-radius: 6px; 
+            background: transparent; color: var(--primary-blue); cursor: pointer; font-size: 11px; 
+            transition: all 0.2s;
+        }
+        .logout-btn:hover { background: rgba(0, 217, 255, 0.2); }
 
-        /* Hamburger */
-        .hamburger { display: none; position: fixed; top: 16px; left: 16px; z-index: 1001; background: #F59E0B; border: none; border-radius: 6px; padding: 8px 12px; cursor: pointer; font-size: 20px; color: #0B0F1A; font-weight: 700; }
+        /* Hamburger - Fixed z-index so it's BELOW sidebar when open */
+        .hamburger { 
+            display: none; position: fixed; top: 16px; left: 16px; z-index: 850; 
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue)); 
+            border: none; border-radius: 6px; padding: 8px 12px; cursor: pointer; 
+            font-size: 20px; color: var(--dark-bg); font-weight: 700; 
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.3);
+        }
+        .hamburger:hover { box-shadow: 0 0 25px rgba(0, 217, 255, 0.6); }
         .hamburger.show { display: block; }
 
         /* Sidebar Overlay */
-        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 899; }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 880; }
         .sidebar-overlay.show { display: block; }
 
         /* Main */
-        main { flex: 1; overflow: auto; padding: 20px; background: #0B0F1A; color: #F9FAFB; margin-left: 200px; transition: margin-left 0.3s ease; }
-        main.mobile-view { margin-left: 0; }
+        main { 
+            flex: 1; overflow: auto; padding: 20px; background: var(--dark-bg); 
+            color: var(--text-light); margin-left: 200px; transition: margin-left 0.3s ease;
+        }
         .content { width: 100%; }
-        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; gap: 16px; flex-wrap: wrap; margin-top: 50px; }
-        .header h2 { font-size: 19px; font-weight: 800; color: #F9FAFB; letter-spacing: -0.3px; }
+        .header { 
+            display: flex; justify-content: space-between; align-items: flex-start; 
+            margin-bottom: 16px; gap: 16px; flex-wrap: wrap; margin-top: 0px;
+        }
+        .header h2 { font-size: 24px; font-weight: 800; color: var(--primary-blue); letter-spacing: 2px; text-shadow: 0 0 10px var(--primary-blue); }
         .header-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-        .add-btn { padding: 8px 16px; background: #F59E0B; border: none; border-radius: 7px; color: #0B0F1A; font-weight: 700; cursor: pointer; font-size: 13px; white-space: nowrap; }
-        .add-btn:hover { opacity: 0.9; }
+        .add-btn { 
+            padding: 10px 18px; background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue)); 
+            border: none; border-radius: 6px; color: var(--dark-bg); font-weight: 700; cursor: pointer; 
+            font-size: 13px; white-space: nowrap; box-shadow: 0 0 15px rgba(0, 217, 255, 0.3);
+            transition: all 0.2s;
+        }
+        .add-btn:hover { box-shadow: 0 0 25px rgba(0, 217, 255, 0.6); transform: scale(1.05); }
 
         /* Date Filter */
         .date-filter { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
-        .filter-btn { padding: 8px 12px; background: transparent; border: 1px solid #1A2333; border-radius: 6px; color: #6B7280; cursor: pointer; font-size: 12px; transition: all 0.15s; white-space: nowrap; }
-        .filter-btn:hover { border-color: #F59E0B; color: #F59E0B; }
-        .filter-btn.active { background: #F59E0B; color: #0B0F1A; border-color: #F59E0B; }
-        .filter-input { padding: 8px 12px; background: #0B0F1A; border: 1px solid #1A2333; border-radius: 6px; color: #F9FAFB; font-size: 12px; outline: none; }
-        .filter-input::placeholder { color: #4B5563; }
+        .filter-btn { 
+            padding: 8px 12px; background: transparent; border: 1px solid var(--primary-blue); 
+            border-radius: 6px; color: var(--text-muted); cursor: pointer; font-size: 12px; 
+            transition: all 0.2s; white-space: nowrap;
+        }
+        .filter-btn:hover { color: var(--primary-blue); box-shadow: 0 0 10px rgba(0, 217, 255, 0.3); }
+        .filter-btn.active { background: rgba(0, 217, 255, 0.2); color: var(--primary-blue); border-color: var(--primary-blue); box-shadow: 0 0 15px rgba(0, 217, 255, 0.4); }
+        .filter-input { 
+            padding: 8px 12px; background: var(--card-bg); border: 1px solid var(--border-color); 
+            border-radius: 6px; color: var(--text-light); font-size: 12px; outline: none; 
+            transition: all 0.2s;
+        }
+        .filter-input::placeholder { color: var(--text-muted); }
+        .filter-input:focus { border-color: var(--primary-blue); box-shadow: 0 0 10px rgba(0, 217, 255, 0.2); }
         .date-range-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 
         /* Cards */
         .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; width: 100%; }
-        .card { background: #0F1624; border-radius: 11px; padding: 16px; border: 1px solid #1A2333; }
+        .card { 
+            background: linear-gradient(135deg, var(--card-bg), rgba(0, 217, 255, 0.05)); 
+            border-radius: 11px; padding: 16px; border: 1px solid var(--border-color); 
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.1);
+            transition: all 0.3s;
+        }
+        .card:hover { border-color: var(--primary-blue); box-shadow: 0 0 30px rgba(0, 217, 255, 0.2); }
         .card.summary { border-top: 3px solid; }
-        .card-label { font-size: 10px; color: #6B7280; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; }
-        .card-value { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+        .card-label { font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 1px; }
+        .card-value { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; text-shadow: 0 0 10px rgba(0, 217, 255, 0.3); }
 
         /* Charts */
         .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 14px; margin-bottom: 16px; width: 100%; }
-        .chart-card { background: #0F1624; border-radius: 11px; padding: 16px; border: 1px solid #1A2333; }
-        .chart-title { font-size: 10px; color: #6B7280; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; }
+        .chart-card { 
+            background: linear-gradient(135deg, var(--card-bg), rgba(0, 217, 255, 0.05)); 
+            border-radius: 11px; padding: 16px; border: 1px solid var(--border-color); 
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.1);
+        }
+        .chart-title { font-size: 10px; color: var(--primary-blue); font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1px; }
         .chart-container { position: relative; height: 250px; margin-bottom: 8px; }
 
         /* Transactions */
         .tx-list { display: flex; flex-direction: column; gap: 0; }
-        .tx-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #111827; }
-        .tx-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+        .tx-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border-color); }
+        .tx-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 8px currentColor; }
         .tx-info { flex: 1; min-width: 0; }
-        .tx-desc { font-size: 13px; color: #F9FAFB; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px; }
-        .tx-meta { font-size: 10px; color: #6B7280; }
+        .tx-desc { font-size: 13px; color: var(--text-light); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px; }
+        .tx-meta { font-size: 10px; color: var(--text-muted); }
         .tx-amount { font-size: 13px; font-weight: 700; flex-shrink: 0; }
-        .tx-delete { background: transparent; border: none; color: #374151; cursor: pointer; font-size: 12px; padding: 2px 6px; }
+        .tx-delete { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 12px; padding: 2px 6px; transition: all 0.2s; }
+        .tx-delete:hover { color: var(--primary-blue); }
 
         /* Chat */
-        .chat-container { background: #0F1624; border-radius: 12px; border: 1px solid #1A2333; overflow: hidden; display: flex; flex-direction: column; height: 60vh; width: 100%; }
+        .chat-container { 
+            background: linear-gradient(135deg, var(--card-bg), rgba(0, 217, 255, 0.05)); 
+            border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden; 
+            display: flex; flex-direction: column; height: 60vh; width: 100%; 
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.1);
+        }
         .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
         .chat-bubble { max-width: 73%; padding: 10px 13px; border-radius: 11px; font-size: 13px; line-height: 1.65; white-space: pre-wrap; }
-        .chat-user { align-self: flex-end; background: #F59E0B; color: #0B0F1A; font-weight: 500; }
-        .chat-bot { align-self: flex-start; background: #1A2333; color: #E5E7EB; }
-        .action-badge { display: block; font-size: 9px; color: #10B981; font-weight: 700; margin-bottom: 3px; letter-spacing: 0.1em; }
-        .chat-input-area { display: flex; border-top: 1px solid #1A2333; }
-        .chat-input { flex: 1; padding: 12px 14px; background: #0B0F1A; border: none; color: #F9FAFB; font-size: 13px; outline: none; }
-        .chat-input::placeholder { color: #4B5563; }
-        .chat-send { padding: 12px 17px; background: #F59E0B; border: none; color: #0B0F1A; font-weight: 700; cursor: pointer; }
-        .chat-suggestions { padding: 7px 13px; border-top: 1px solid #1A2333; display: flex; gap: 6px; flex-wrap: wrap; background: #0B0F1A; }
-        .chat-suggestion { padding: 3px 9px; background: transparent; border: 1px solid #1A2333; border-radius: 20px; color: #6B7280; font-size: 10px; cursor: pointer; }
+        .chat-user { align-self: flex-end; background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue)); color: var(--dark-bg); font-weight: 500; box-shadow: 0 0 10px rgba(0, 217, 255, 0.3); }
+        .chat-bot { align-self: flex-start; background: var(--card-bg); color: var(--text-light); border: 1px solid var(--primary-blue); }
+        .action-badge { display: block; font-size: 9px; color: #00FF41; font-weight: 700; margin-bottom: 3px; letter-spacing: 0.1em; text-shadow: 0 0 5px #00FF41; }
+        .chat-input-area { display: flex; border-top: 1px solid var(--border-color); }
+        .chat-input { 
+            flex: 1; padding: 12px 14px; background: var(--dark-bg); border: none; 
+            color: var(--text-light); font-size: 13px; outline: none;
+        }
+        .chat-input::placeholder { color: var(--text-muted); }
+        .chat-send { 
+            padding: 12px 17px; background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue)); 
+            border: none; color: var(--dark-bg); font-weight: 700; cursor: pointer; transition: all 0.2s;
+        }
+        .chat-send:hover { box-shadow: 0 0 15px rgba(0, 217, 255, 0.3); }
+        .chat-suggestions { padding: 7px 13px; border-top: 1px solid var(--border-color); display: flex; gap: 6px; flex-wrap: wrap; background: var(--dark-bg); }
+        .chat-suggestion { 
+            padding: 3px 9px; background: transparent; border: 1px solid var(--primary-blue); 
+            border-radius: 20px; color: var(--text-muted); font-size: 10px; cursor: pointer; transition: all 0.2s;
+        }
+        .chat-suggestion:hover { color: var(--primary-blue); box-shadow: 0 0 8px rgba(0, 217, 255, 0.3); }
 
         /* Modal */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.78); display: none; align-items: center; justify-content: center; z-index: 999; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 999; }
         .modal-overlay.show { display: flex; }
-        .modal { background: #0F1624; border-radius: 15px; padding: 24px; width: 340px; border: 1px solid #1A2333; }
-        .modal h3 { font-size: 15px; font-weight: 700; color: #F9FAFB; margin-bottom: 16px; }
+        .modal { 
+            background: linear-gradient(135deg, var(--card-bg), rgba(0, 217, 255, 0.05)); 
+            border-radius: 15px; padding: 24px; width: 340px; border: 1px solid var(--border-color); 
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.2);
+        }
+        .modal h3 { font-size: 15px; font-weight: 700; color: var(--primary-blue); margin-bottom: 16px; }
         .type-buttons { display: flex; gap: 8px; margin-bottom: 12px; }
-        .type-btn { flex: 1; padding: 8px; border-radius: 7px; border: 1px solid #1A2333; background: transparent; color: #6B7280; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.15s; }
-        .type-btn.active { border-color: #F59E0B; background: #F59E0B18; color: #F59E0B; }
+        .type-btn { 
+            flex: 1; padding: 8px; border-radius: 7px; border: 1px solid var(--border-color); 
+            background: transparent; color: var(--text-muted); cursor: pointer; font-size: 13px; 
+            font-weight: 500; transition: all 0.2s;
+        }
+        .type-btn:hover { border-color: var(--primary-blue); color: var(--primary-blue); }
+        .type-btn.active { border-color: var(--primary-blue); background: rgba(0, 217, 255, 0.2); color: var(--primary-blue); box-shadow: 0 0 10px rgba(0, 217, 255, 0.3); }
         .form-group { margin-bottom: 10px; }
-        .form-input, .form-select { padding: 9px 11px; background: #0B0F1A; border: 1px solid #1A2333; border-radius: 7px; color: #F9FAFB; font-size: 13px; width: 100%; outline: none; }
-        .form-input::placeholder { color: #4B5563; }
+        .form-input, .form-select { 
+            padding: 9px 11px; background: var(--dark-bg); border: 1px solid var(--border-color); 
+            border-radius: 7px; color: var(--text-light); font-size: 13px; width: 100%; outline: none; 
+            transition: all 0.2s;
+        }
+        .form-input::placeholder { color: var(--text-muted); }
+        .form-input:focus, .form-select:focus { border-color: var(--primary-blue); box-shadow: 0 0 10px rgba(0, 217, 255, 0.2); }
         .form-buttons { display: flex; gap: 8px; margin-top: 12px; }
-        .btn-cancel { flex: 1; padding: 10px; border: 1px solid #1A2333; border-radius: 7px; background: transparent; color: #6B7280; cursor: pointer; font-size: 13px; }
-        .btn-submit { flex: 1; padding: 10px; border: none; border-radius: 7px; background: #F59E0B; color: #0B0F1A; font-weight: 700; cursor: pointer; font-size: 13px; }
+        .btn-cancel { 
+            flex: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 7px; 
+            background: transparent; color: var(--text-muted); cursor: pointer; font-size: 13px; transition: all 0.2s;
+        }
+        .btn-cancel:hover { border-color: var(--primary-blue); color: var(--primary-blue); }
+        .btn-submit { 
+            flex: 1; padding: 10px; border: none; border-radius: 7px; 
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue)); 
+            color: var(--dark-bg); font-weight: 700; cursor: pointer; font-size: 13px; 
+            transition: all 0.2s; box-shadow: 0 0 10px rgba(0, 217, 255, 0.2);
+        }
+        .btn-submit:hover { box-shadow: 0 0 20px rgba(0, 217, 255, 0.4); }
 
-        /* Login/Config */
-        .page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #0B0F1A; padding: 20px; }
-        .login-card { background: #0F1624; border-radius: 15px; padding: 32px; width: 100%; max-width: 330px; border: 1px solid #1A2333; }
-        .config-card { background: #0F1624; border-radius: 15px; padding: 32px; width: 100%; max-width: 430px; border: 1px solid #1A2333; }
+        /* Login/Config - CENTERED FIX */
+        .page { 
+            min-height: 100vh; display: flex; align-items: center; justify-content: center; 
+            background: var(--dark-bg); padding: 20px; width: 100%;
+        }
+        .login-card, .config-card { 
+            background: linear-gradient(135deg, var(--card-bg), rgba(0, 217, 255, 0.05)); 
+            border-radius: 15px; padding: 32px; border: 1px solid var(--border-color); 
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.2); max-width: 330px; margin: 0 auto;
+        }
+        .config-card { max-width: 430px; }
         .card-header { text-align: center; margin-bottom: 24px; }
-        .card-title { font-size: 19px; font-weight: 800; color: #F9FAFB; margin-top: 8px; }
-        .card-subtitle { font-size: 12px; color: #6B7280; margin-top: 5px; }
+        .card-title { font-size: 22px; font-weight: 800; color: var(--primary-blue); margin-top: 8px; text-shadow: 0 0 10px var(--primary-blue); }
+        .card-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
         .form-group-vertical { display: flex; flex-direction: column; gap: 10px; }
-        .primary-btn { padding: 11px; background: #F59E0B; border: none; border-radius: 7px; color: #0B0F1A; font-weight: 800; cursor: pointer; font-size: 14px; width: 100%; }
-        .error-msg { color: #F43F5E; font-size: 12px; }
-        .sql-box { background: #060912; border-radius: 10px; padding: 14px; margin: 18px 0; border: 1px solid #1A2333; }
-        .sql-title { font-size: 11px; color: #F59E0B; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; }
+        .primary-btn { 
+            padding: 11px; background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue)); 
+            border: none; border-radius: 7px; color: var(--dark-bg); font-weight: 800; cursor: pointer; 
+            font-size: 14px; width: 100%; transition: all 0.2s; box-shadow: 0 0 15px rgba(0, 217, 255, 0.2);
+        }
+        .primary-btn:hover { box-shadow: 0 0 25px rgba(0, 217, 255, 0.4); }
+        .error-msg { color: #FF0055; font-size: 12px; }
+        .sql-box { background: rgba(0, 217, 255, 0.05); border-radius: 10px; padding: 14px; margin: 18px 0; border: 1px solid var(--border-color); }
+        .sql-title { font-size: 11px; color: var(--primary-blue); font-weight: 700; margin-bottom: 10px; text-transform: uppercase; }
         .sql-steps { display: flex; flex-direction: column; gap: 7px; }
         .sql-step { display: flex; gap: 9px; align-items: flex-start; }
-        .step-number { width: 20px; height: 20px; border-radius: 50%; background: #F59E0B; color: #0B0F1A; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; flex-shrink: 0; margin-top: 1px; }
-        .step-text { font-size: 12px; color: #D1D5DB; }
-        .sql-toggle { margin-top: 6px; padding: 6px 12px; background: transparent; border: 1px solid #374151; border-radius: 6px; color: #9CA3AF; font-size: 11px; cursor: pointer; width: 100%; }
-        .sql-textarea { width: 100%; margin-top: 9px; padding: 10px; background: #0B0F1A; border: 1px solid #1A2333; border-radius: 7px; color: #10B981; font-size: 11px; font-family: monospace; height: 160px; resize: none; }
+        .step-number { 
+            width: 20px; height: 20px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue)); 
+            color: var(--dark-bg); display: flex; align-items: center; justify-content: center; 
+            font-size: 10px; font-weight: 800; flex-shrink: 0; margin-top: 1px; box-shadow: 0 0 10px var(--primary-blue);
+        }
+        .step-text { font-size: 12px; color: var(--text-light); }
+        .sql-toggle { 
+            margin-top: 6px; padding: 6px 12px; background: transparent; border: 1px solid var(--primary-blue); 
+            border-radius: 6px; color: var(--primary-blue); font-size: 11px; cursor: pointer; width: 100%; transition: all 0.2s;
+        }
+        .sql-toggle:hover { background: rgba(0, 217, 255, 0.1); }
+        .sql-textarea { 
+            width: 100%; margin-top: 9px; padding: 10px; background: var(--dark-bg); 
+            border: 1px solid var(--border-color); border-radius: 7px; color: #00FF41; 
+            font-size: 11px; font-family: monospace; height: 160px; resize: none;
+        }
 
         /* Mobile */
         @media (max-width: 768px) {
             .sidebar { width: 100%; }
             main { margin-left: 0; padding: 16px; }
-            main.mobile-view { margin-left: 0; }
             .hamburger.show { display: block; }
             .sidebar.hidden { transform: translateX(-100%); }
-            .header { margin-top: 60px; flex-direction: column; }
-            .header-actions { width: 100%; flex-direction: column; }
+            .header { flex-direction: column; }
+            .header-actions { width: 100%; }
             .date-filter { width: 100%; }
             .charts-grid { grid-template-columns: 1fr; }
             .cards-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
             .card-value { font-size: 18px; }
-            .add-btn, .filter-btn { font-size: 12px; padding: 6px 12px; }
         }
 
         @media (max-width: 480px) {
             main { padding: 12px; }
             .modal { width: 90%; }
             .card-value { font-size: 16px; }
-            .header h2 { font-size: 16px; }
+            .header h2 { font-size: 18px; }
             .date-filter { flex-direction: column; }
             .filter-input { width: 100%; }
-            .date-range-group { width: 100%; }
         }
     </style>
 </head>
 <body>
-    <!-- Hamburger (Hidden on login/config) -->
-    <button class="hamburger" id="hamburger" onclick="toggleSidebar()" style="display:none;">☰</button>
+    <!-- Hamburger -->
+    <button class="hamburger show" id="hamburger" onclick="toggleSidebar()" style="display:none;">☰</button>
 
     <!-- Sidebar Overlay -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
@@ -167,7 +301,7 @@
         <div class="user-section">
             <div class="user-info">
                 <div class="avatar" id="avatarLetter">F</div>
-                <span id="userName" style="font-size:13px; color:#D1D5DB;">Felipe</span>
+                <span id="userName" style="font-size:13px; color:var(--text-light);">Felipe</span>
             </div>
             <button class="logout-btn" onclick="logout()">Sair</button>
         </div>
@@ -179,9 +313,9 @@
             <!-- Dashboard Tab -->
             <div id="dashboardTab">
                 <div class="header">
-                    <h2>Dashboard</h2>
+                    <h2>DASHBOARD</h2>
                     <div class="header-actions">
-                        <button class="add-btn" onclick="openAddForm()">+ Adicionar</button>
+                        <button class="add-btn" onclick="openAddForm()">+ ADICIONAR</button>
                     </div>
                 </div>
 
@@ -193,28 +327,28 @@
                     <button class="filter-btn" data-range="yesterday" onclick="setDateRange('yesterday')">Ontem</button>
                     <div class="date-range-group">
                         <input type="date" class="filter-input" id="dateFrom" placeholder="De:" onchange="setDateRange('custom')">
-                        <span style="color:#6B7280; font-size:12px;">até</span>
+                        <span style="color:var(--text-muted); font-size:12px;">até</span>
                         <input type="date" class="filter-input" id="dateTo" placeholder="Até:" onchange="setDateRange('custom')">
                     </div>
                 </div>
 
                 <!-- Cards -->
                 <div class="cards-grid">
-                    <div class="card summary" style="border-top-color: #10B981;">
+                    <div class="card summary" style="border-top-color: #00FF41;">
                         <div class="card-label">Receitas</div>
-                        <div class="card-value" style="color: #10B981;" id="cardIncome">R$ 0,00</div>
+                        <div class="card-value" style="color: #00FF41;" id="cardIncome">R$ 0,00</div>
                     </div>
-                    <div class="card summary" style="border-top-color: #F43F5E;">
+                    <div class="card summary" style="border-top-color: #FF0055;">
                         <div class="card-label">Despesas</div>
-                        <div class="card-value" style="color: #F43F5E;" id="cardExpense">R$ 0,00</div>
+                        <div class="card-value" style="color: #FF0055;" id="cardExpense">R$ 0,00</div>
                     </div>
-                    <div class="card summary" style="border-top-color: #F59E0B;">
+                    <div class="card summary" style="border-top-color: var(--accent-gold);">
                         <div class="card-label">Saldo</div>
-                        <div class="card-value" style="color: #F59E0B;" id="cardBalance">R$ 0,00</div>
+                        <div class="card-value" style="color: var(--accent-gold);" id="cardBalance">R$ 0,00</div>
                     </div>
-                    <div class="card summary" style="border-top-color: #8B5CF6;">
+                    <div class="card summary" style="border-top-color: var(--primary-blue);">
                         <div class="card-label">Lançamentos</div>
-                        <div class="card-value" style="color: #8B5CF6;" id="cardCount">0</div>
+                        <div class="card-value" style="color: var(--primary-blue);" id="cardCount">0</div>
                     </div>
                 </div>
 
@@ -236,9 +370,9 @@
 
                 <!-- Transactions -->
                 <div class="card">
-                    <div style="font-size: 10px; color: #6B7280; font-weight: 700; text-transform: uppercase; margin-bottom: 12px;">Transações</div>
+                    <div style="font-size: 10px; color: var(--primary-blue); font-weight: 700; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1px;">Transações</div>
                     <div class="tx-list" id="txList">
-                        <p style="color:#4B5563; text-align:center; padding:24px; font-size:12px;">Nenhuma transação</p>
+                        <p style="color:var(--text-muted); text-align:center; padding:24px; font-size:12px;">Nenhuma transação</p>
                     </div>
                 </div>
             </div>
@@ -246,14 +380,14 @@
             <!-- Transactions Tab -->
             <div id="transactionsTab" style="display:none;">
                 <div class="header">
-                    <h2>Transações</h2>
+                    <h2>TRANSAÇÕES</h2>
                     <div class="header-actions">
-                        <button class="add-btn" onclick="openAddForm()">+ Adicionar</button>
+                        <button class="add-btn" onclick="openAddForm()">+ ADICIONAR</button>
                     </div>
                 </div>
                 <div class="card">
                     <div class="tx-list" id="txListFull">
-                        <p style="color:#4B5563; text-align:center; padding:24px; font-size:12px;">Nenhuma transação</p>
+                        <p style="color:var(--text-muted); text-align:center; padding:24px; font-size:12px;">Nenhuma transação</p>
                     </div>
                 </div>
             </div>
@@ -261,11 +395,11 @@
             <!-- Chat Tab -->
             <div id="chatTab" style="display:none;">
                 <div class="header">
-                    <h2>Assistente IA ✦</h2>
+                    <h2>ASSISTENTE IA</h2>
                 </div>
                 <div class="chat-container">
                     <div class="chat-messages" id="chatMessages">
-                        <div class="chat-bubble chat-bot">Olá Felipe e Stephanie! 💰<br><br>Sou sua assistente financeira.<br><br>Tente: "Gastei R$50 no mercado"</div>
+                        <div class="chat-bubble chat-bot">Olá Felipe e Stephanie! 💰<br><br>Sou sua assistente financeira IA.<br><br>Tente: "Gastei R$50 no mercado"</div>
                     </div>
                     <div class="chat-input-area">
                         <input type="text" class="chat-input" id="chatInput" placeholder="Ex: Gastei R$45..." onkeydown="if(event.key==='Enter') sendChat()">
@@ -287,15 +421,15 @@
             <div class="card-header">
                 <div style="font-size:40px; margin-bottom:8px;">💰</div>
                 <h1 class="card-title">FinFamília</h1>
-                <p class="card-subtitle">Controle financeiro do casal</p>
+                <p class="card-subtitle">Controle Financeiro Futurista</p>
             </div>
             <div class="form-group-vertical">
                 <input type="text" class="form-input" id="loginUser" placeholder="Usuário">
                 <input type="password" class="form-input" id="loginPass" placeholder="Senha">
                 <div id="loginError" class="error-msg"></div>
-                <button class="primary-btn" onclick="doLogin()">Entrar →</button>
+                <button class="primary-btn" onclick="doLogin()">ENTRAR</button>
             </div>
-            <button onclick="showConfigScreen()" style="margin-top:18px; background:transparent; border:none; color:#374151; font-size:11px; cursor:pointer; width:100%;">⚙ Configurar</button>
+            <button onclick="showConfigScreen()" style="margin-top:18px; background:transparent; border:none; color:var(--text-muted); font-size:11px; cursor:pointer; width:100%; transition:all 0.2s;" onmouseover="this.style.color='var(--primary-blue)'" onmouseout="this.style.color='var(--text-muted)'">⚙ Configurar</button>
         </div>
     </div>
 
@@ -345,12 +479,12 @@ DROP POLICY IF EXISTS "allow_all" ON transactions;
 CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true);</textarea>
             </div>
             <div class="form-group-vertical">
-                <label style="font-size:11px; color:#6B7280;">Project URL</label>
+                <label style="font-size:11px; color:var(--text-muted);">Project URL</label>
                 <input type="text" class="form-input" id="configUrl" placeholder="https://xxxxx.supabase.co">
-                <label style="font-size:11px; color:#6B7280; margin-top:10px;">Anon key</label>
+                <label style="font-size:11px; color:var(--text-muted); margin-top:10px;">Anon key</label>
                 <input type="text" class="form-input" id="configKey" placeholder="eyJ...">
                 <div id="configError" class="error-msg" style="margin-top:10px;"></div>
-                <button class="primary-btn" id="configBtn" onclick="submitConfig()" style="margin-top:10px;">Conectar →</button>
+                <button class="primary-btn" id="configBtn" onclick="submitConfig()" style="margin-top:10px;">CONECTAR</button>
             </div>
         </div>
     </div>
@@ -358,7 +492,7 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
     <!-- Add Modal -->
     <div id="addModal" class="modal-overlay">
         <div class="modal">
-            <h3>Nova Transação</h3>
+            <h3>NOVA TRANSAÇÃO</h3>
             <div class="type-buttons">
                 <button class="type-btn active" onclick="setTxType('expense')">Despesa</button>
                 <button class="type-btn" onclick="setTxType('income')">Receita</button>
@@ -378,6 +512,8 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
                     <option>Casa</option>
                     <option>Educação</option>
                     <option>Roupas</option>
+                    <option>Gatos</option>
+                    <option>Antônio</option>
                     <option>Outros</option>
                 </select>
             </div>
@@ -452,7 +588,7 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
 
             const btn = document.getElementById('configBtn');
             btn.disabled = true;
-            btn.textContent = 'Conectando...';
+            btn.textContent = 'CONECTANDO...';
             errorDiv.textContent = '';
 
             try {
@@ -472,7 +608,7 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
                 errorDiv.textContent = '❌ ' + e.message;
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'Conectar →';
+                btn.textContent = 'CONECTAR';
             }
         }
 
@@ -647,20 +783,20 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
 
             const html = filtered.map(t => `
                 <div class="tx-item">
-                    <div class="tx-dot" style="background: ${t.type === 'income' ? '#10B981' : '#F43F5E'};"></div>
+                    <div class="tx-dot" style="background: ${t.type === 'income' ? '#00FF41' : '#FF0055'};"></div>
                     <div class="tx-info">
                         <div class="tx-desc">${t.description}</div>
                         <div class="tx-meta">${t.category} · ${t.added_by} · ${new Date(t.date).toLocaleDateString('pt-BR')}</div>
                     </div>
-                    <span class="tx-amount" style="color: ${t.type === 'income' ? '#10B981' : '#F43F5E'};">
+                    <span class="tx-amount" style="color: ${t.type === 'income' ? '#00FF41' : '#FF0055'};">
                         ${t.type === 'income' ? '+' : '-'}${fmt(t.amount)}
                     </span>
                     <button class="tx-delete" onclick="deleteTransaction(${t.id})">✕</button>
                 </div>
             `).join('');
 
-            document.getElementById('txList').innerHTML = html || '<p style="color:#4B5563; text-align:center; padding:24px; font-size:12px;">Nenhuma transação</p>';
-            document.getElementById('txListFull').innerHTML = html || '<p style="color:#4B5563; text-align:center; padding:24px; font-size:12px;">Nenhuma transação</p>';
+            document.getElementById('txList').innerHTML = html || '<p style="color:var(--text-muted); text-align:center; padding:24px; font-size:12px;">Nenhuma transação</p>';
+            document.getElementById('txListFull').innerHTML = html || '<p style="color:var(--text-muted); text-align:center; padding:24px; font-size:12px;">Nenhuma transação</p>';
         }
 
         function updateCards() {
@@ -703,34 +839,34 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
                 data: {
                     labels: barData.map(d => d.month),
                     datasets: [
-                        { label: 'Receitas', data: barData.map(d => d.receitas), backgroundColor: '#10B981', borderRadius: 3 },
-                        { label: 'Despesas', data: barData.map(d => d.despesas), backgroundColor: '#F43F5E', borderRadius: 3 }
+                        { label: 'Receitas', data: barData.map(d => d.receitas), backgroundColor: '#00FF41', borderRadius: 3 },
+                        { label: 'Despesas', data: barData.map(d => d.despesas), backgroundColor: '#FF0055', borderRadius: 3 }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#9CA3AF', font: { size: 11 } } } },
+                    plugins: { legend: { labels: { color: '#7A8FB0', font: { size: 11 } } } },
                     scales: {
-                        y: { ticks: { color: '#6B7280', font: { size: 10 } }, grid: { color: '#1A2333' } },
-                        x: { ticks: { color: '#6B7280', font: { size: 10 } }, grid: { display: false } }
+                        y: { ticks: { color: '#7A8FB0', font: { size: 10 } }, grid: { color: '#1A2E5C' } },
+                        x: { ticks: { color: '#7A8FB0', font: { size: 10 } }, grid: { display: false } }
                     }
                 }
             });
 
             const pieCtx = document.getElementById('pieChart').getContext('2d');
             if (pieChart) pieChart.destroy();
-            const colors = ['#F59E0B', '#3B82F6', '#10B981', '#8B5CF6', '#EC4899', '#06B6D4', '#F97316', '#6B7280'];
+            const colors = ['#00D9FF', '#0099CC', '#00FF41', '#FFD700', '#FF0055', '#06B6D4', '#F97316', '#7A8FB0'];
             pieChart = new Chart(pieCtx, {
                 type: 'doughnut',
                 data: {
                     labels: pieLabels,
-                    datasets: [{ data: pieValues, backgroundColor: colors.slice(0, pieLabels.length), borderColor: '#0F1624', borderWidth: 2 }]
+                    datasets: [{ data: pieValues, backgroundColor: colors.slice(0, pieLabels.length), borderColor: '#0F1A3D', borderWidth: 2 }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#9CA3AF', font: { size: 10 } }, position: 'bottom' } }
+                    plugins: { legend: { labels: { color: '#7A8FB0', font: { size: 10 } }, position: 'bottom' } }
                 }
             });
         }
@@ -753,7 +889,7 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
             document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
             const cats = type === 'expense' 
-                ? ['Alimentação', 'Transporte', 'Saúde', 'Lazer', 'Casa', 'Educação', 'Roupas', 'Outros']
+                ? ['Alimentação', 'Transporte', 'Saúde', 'Lazer', 'Casa', 'Educação', 'Roupas', 'Gatos', 'Antônio', 'Outros']
                 : ['Salário', 'Freelance', 'Investimentos', 'Outros'];
             document.getElementById('formCategory').innerHTML = cats.map(c => `<option>${c}</option>`).join('');
         }
@@ -789,23 +925,30 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
             userBubble.className = 'chat-bubble chat-user';
             userBubble.textContent = input;
             msgDiv.appendChild(userBubble);
+            msgDiv.scrollTop = msgDiv.scrollHeight;
 
             try {
                 const filtered = getFilteredTransactions();
                 const income = filtered.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
                 const expense = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
 
-                const sys = `Você é assistente financeira do casal Felipe e Stephanie.
-Dados: Receitas ${fmt(income)} | Despesas ${fmt(expense)} | Saldo ${fmt(income - expense)}
-Categorias: Alimentação, Transporte, Saúde, Lazer, Casa, Educação, Roupas, Outros
-REGRA: Se registrar gasto, responda SOMENTE com JSON:
-{"message":"confirmação","action":{"type":"add_transaction","transaction":{"type":"expense|income","description":"texto","amount":número,"category":"cat","date":"YYYY-MM-DD"}}}
-Senão, responda em texto curto.`;
+                const sys = `Você é assistente financeira do casal Felipe e Stephanie. Fale em PT-BR casual.
+Dados do período: Receitas ${fmt(income)} | Despesas ${fmt(expense)} | Saldo ${fmt(income - expense)}
+Categorias de despesa: Alimentação, Transporte, Saúde, Lazer, Casa, Educação, Roupas, Gatos, Antônio, Outros
+Categorias de receita: Salário, Freelance, Investimentos, Outros
+IMPORTANTE: Se o usuário mencionar que vai registrar uma despesa/receita, responda SOMENTE em JSON:
+{"message":"[sua confirmação em português]","action":{"type":"add_transaction","transaction":{"type":"expense ou income","description":"[descrição do gasto]","amount":[número],"category":"[categoria]","date":"${new Date().toISOString().split('T')[0]}"}}}
+Se for apenas pergunta ou conversa, responda em texto amigável normal.`;
 
                 const res = await fetch('https://api.anthropic.com/v1/messages', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 500, system: sys, messages: [{ role: 'user', content: input }] })
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 500,
+                        system: sys,
+                        messages: [{ role: 'user', content: input }]
+                    })
                 });
 
                 const data = await res.json();
@@ -815,10 +958,17 @@ Senão, responda em texto curto.`;
                     const p = JSON.parse(raw.trim());
                     if (p.action?.type === 'add_transaction') {
                         const tx = p.action.transaction;
-                        await addTransaction({ type: tx.type, description: tx.description, amount: tx.amount, category: tx.category, date: tx.date, added_by: currentUser.name });
+                        await addTransaction({
+                            type: tx.type,
+                            description: tx.description,
+                            amount: tx.amount,
+                            category: tx.category,
+                            date: tx.date,
+                            added_by: currentUser.name
+                        });
                         const bubble = document.createElement('div');
                         bubble.className = 'chat-bubble chat-bot';
-                        bubble.innerHTML = `<span class="action-badge">✓ SALVO</span>${p.message}`;
+                        bubble.innerHTML = `<span class="action-badge">✓ TRANSAÇÃO SALVA</span>${p.message}`;
                         msgDiv.appendChild(bubble);
                     } else {
                         const bubble = document.createElement('div');
@@ -826,7 +976,7 @@ Senão, responda em texto curto.`;
                         bubble.textContent = p.message || raw;
                         msgDiv.appendChild(bubble);
                     }
-                } catch {
+                } catch (e) {
                     const bubble = document.createElement('div');
                     bubble.className = 'chat-bubble chat-bot';
                     bubble.textContent = raw;
@@ -835,7 +985,7 @@ Senão, responda em texto curto.`;
             } catch (e) {
                 const bubble = document.createElement('div');
                 bubble.className = 'chat-bubble chat-bot';
-                bubble.textContent = 'Erro de conexão com IA.';
+                bubble.textContent = 'Erro ao conectar com IA. Tente novamente.';
                 msgDiv.appendChild(bubble);
             }
 
