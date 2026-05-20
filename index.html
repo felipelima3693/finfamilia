@@ -928,6 +928,21 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
             msgDiv.scrollTop = msgDiv.scrollHeight;
 
             try {
+                let apiKey = localStorage.getItem('anthropic_api_key');
+                
+                if (!apiKey) {
+                    apiKey = prompt('🔑 Cole sua chave de API do Anthropic (https://console.anthropic.com):\n\nEx: sk-ant-v1-...');
+                    if (!apiKey) return;
+                    
+                    if (!apiKey.startsWith('sk-ant-')) {
+                        alert('❌ Chave inválida! Deve começar com "sk-ant-"');
+                        return;
+                    }
+                    
+                    localStorage.setItem('anthropic_api_key', apiKey);
+                    alert('✅ Chave salva! Tentando novamente...');
+                }
+
                 const filtered = getFilteredTransactions();
                 const income = filtered.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
                 const expense = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
@@ -943,7 +958,7 @@ Se for apenas pergunta ou conversa normal, responda em texto amigável normal SE
                 // Show loading state
                 const loadingBubble = document.createElement('div');
                 loadingBubble.className = 'chat-bubble chat-bot';
-                loadingBubble.textContent = 'Pensando...';
+                loadingBubble.textContent = '⏳ Pensando...';
                 msgDiv.appendChild(loadingBubble);
                 msgDiv.scrollTop = msgDiv.scrollHeight;
 
@@ -951,7 +966,7 @@ Se for apenas pergunta ou conversa normal, responda em texto amigável normal SE
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
-                        'x-api-key': 'sk-ant-v1-HRYQc2sIvQjSVvDEj9nN4fJfV8Z8OqW5V4kMT1K4a8R7z6qQCh0QCq3Y5E8K9x5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q'
+                        'x-api-key': apiKey
                     },
                     body: JSON.stringify({
                         model: 'claude-sonnet-4-20250514',
@@ -961,14 +976,24 @@ Se for apenas pergunta ou conversa normal, responda em texto amigável normal SE
                     })
                 });
 
+                // Remove loading
                 msgDiv.removeChild(loadingBubble);
 
                 if (!res.ok) {
                     const error = await res.json();
-                    const bubble = document.createElement('div');
-                    bubble.className = 'chat-bubble chat-bot';
-                    bubble.textContent = '⚠️ Erro na IA. Mas você pode adicionar gastos manualmente!';
-                    msgDiv.appendChild(bubble);
+                    
+                    if (res.status === 401) {
+                        localStorage.removeItem('anthropic_api_key');
+                        const bubble = document.createElement('div');
+                        bubble.className = 'chat-bubble chat-bot';
+                        bubble.textContent = '❌ Chave de API inválida! Tente novamente (será pedida na próxima mensagem).';
+                        msgDiv.appendChild(bubble);
+                    } else {
+                        const bubble = document.createElement('div');
+                        bubble.className = 'chat-bubble chat-bot';
+                        bubble.textContent = '⚠️ Erro: ' + (error.error?.message || 'Tente novamente');
+                        msgDiv.appendChild(bubble);
+                    }
                     msgDiv.scrollTop = msgDiv.scrollHeight;
                     return;
                 }
@@ -977,6 +1002,7 @@ Se for apenas pergunta ou conversa normal, responda em texto amigável normal SE
                 const raw = data.content?.[0]?.text || 'Tente novamente.';
 
                 try {
+                    // Try to parse as JSON
                     const p = JSON.parse(raw.trim());
                     if (p.action?.type === 'add_transaction') {
                         const tx = p.action.transaction;
@@ -999,6 +1025,7 @@ Se for apenas pergunta ou conversa normal, responda em texto amigável normal SE
                         msgDiv.appendChild(bubble);
                     }
                 } catch (e) {
+                    // Not JSON - just a regular response
                     const bubble = document.createElement('div');
                     bubble.className = 'chat-bubble chat-bot';
                     bubble.textContent = raw;
@@ -1007,7 +1034,7 @@ Se for apenas pergunta ou conversa normal, responda em texto amigável normal SE
             } catch (e) {
                 const bubble = document.createElement('div');
                 bubble.className = 'chat-bubble chat-bot';
-                bubble.textContent = '❌ Erro ao conectar. Tente novamente.';
+                bubble.textContent = '❌ ' + e.message;
                 msgDiv.appendChild(bubble);
             }
 
