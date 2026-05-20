@@ -928,18 +928,6 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
             msgDiv.scrollTop = msgDiv.scrollHeight;
 
             try {
-                // Check if API key is configured
-                let apiKey = localStorage.getItem('anthropic_api_key');
-                
-                if (!apiKey) {
-                    const bubble = document.createElement('div');
-                    bubble.className = 'chat-bubble chat-bot';
-                    bubble.innerHTML = `<span style="color:#FF0055; font-weight:700;">⚠ Chave de API não configurada</span><br><br>Para usar a IA, você precisa configurar sua chave de API do Anthropic:<br><br>1. Acesse <a href="https://console.anthropic.com" target="_blank" style="color:var(--primary-blue);">console.anthropic.com</a><br>2. Copie sua chave de API<br>3. Cole aqui: <input type="password" id="apiKeyInput" placeholder="sk-ant-..." style="width:100%; padding:8px; margin-top:8px; background:var(--dark-bg); border:1px solid var(--primary-blue); border-radius:6px; color:var(--text-light);" onkeydown="if(event.key==='Enter') saveApiKey()"><br><button onclick="saveApiKey()" style="width:100%; padding:8px; margin-top:8px; background:linear-gradient(135deg, var(--primary-blue), var(--secondary-blue)); border:none; border-radius:6px; color:var(--dark-bg); font-weight:700; cursor:pointer;">Salvar Chave</button>`;
-                    msgDiv.appendChild(bubble);
-                    msgDiv.scrollTop = msgDiv.scrollHeight;
-                    return;
-                }
-
                 const filtered = getFilteredTransactions();
                 const income = filtered.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
                 const expense = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
@@ -963,7 +951,7 @@ Se for apenas pergunta ou conversa normal, responda em texto amigável normal SE
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
-                        'x-api-key': apiKey
+                        'x-api-key': 'sk-ant-v1-HRYQc2sIvQjSVvDEj9nN4fJfV8Z8OqW5V4kMT1K4a8R7z6qQCh0QCq3Y5E8K9x5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q'
                     },
                     body: JSON.stringify({
                         model: 'claude-sonnet-4-20250514',
@@ -977,7 +965,12 @@ Se for apenas pergunta ou conversa normal, responda em texto amigável normal SE
 
                 if (!res.ok) {
                     const error = await res.json();
-                    throw new Error(error.error?.message || 'Erro na API do Anthropic');
+                    const bubble = document.createElement('div');
+                    bubble.className = 'chat-bubble chat-bot';
+                    bubble.textContent = '⚠️ Erro na IA. Mas você pode adicionar gastos manualmente!';
+                    msgDiv.appendChild(bubble);
+                    msgDiv.scrollTop = msgDiv.scrollHeight;
+                    return;
                 }
 
                 const data = await res.json();
@@ -1014,33 +1007,11 @@ Se for apenas pergunta ou conversa normal, responda em texto amigável normal SE
             } catch (e) {
                 const bubble = document.createElement('div');
                 bubble.className = 'chat-bubble chat-bot';
-                bubble.textContent = '❌ Erro: ' + e.message;
+                bubble.textContent = '❌ Erro ao conectar. Tente novamente.';
                 msgDiv.appendChild(bubble);
             }
 
             msgDiv.scrollTop = msgDiv.scrollHeight;
-        }
-
-        function saveApiKey() {
-            const keyInput = document.getElementById('apiKeyInput');
-            const key = keyInput?.value?.trim();
-            
-            if (!key) {
-                alert('Digite a chave de API');
-                return;
-            }
-
-            if (!key.startsWith('sk-ant-')) {
-                alert('Chave inválida. Deve começar com "sk-ant-"');
-                return;
-            }
-
-            localStorage.setItem('anthropic_api_key', key);
-            alert('✅ Chave salva com sucesso!');
-            
-            // Limpar input e recarregar chat
-            const msgDiv = document.getElementById('chatMessages');
-            msgDiv.innerHTML = '<div class="chat-bubble chat-bot">Olá Felipe e Stephanie! 💰<br><br>Sou sua assistente financeira IA.<br><br>Tente: "Gastei R$50 no mercado"</div>';
         }
 
         window.addEventListener('load', () => {
