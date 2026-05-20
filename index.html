@@ -264,24 +264,70 @@
         /* Mobile */
         @media (max-width: 768px) {
             .sidebar { width: 100%; }
-            main { margin-left: 0; padding: 16px; }
+            main { margin-left: 0; padding: 70px 16px 16px 16px; }
             .hamburger.show { display: block; }
             .sidebar.hidden { transform: translateX(-100%); }
-            .header { flex-direction: column; }
-            .header-actions { width: 100%; }
-            .date-filter { width: 100%; }
+            .header { flex-direction: column; margin-top: 0px; }
+            .header h2 { font-size: 18px; }
+            .header-actions { width: 100%; flex-direction: column; }
+            .date-filter { 
+                width: 100%; 
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 6px;
+                margin-bottom: 8px;
+            }
+            .filter-btn { 
+                padding: 7px 4px; 
+                font-size: 11px; 
+                white-space: normal;
+                line-height: 1.3;
+                text-align: center;
+            }
+            .date-range-group { 
+                grid-column: 1 / -1;
+                display: flex;
+                gap: 6px;
+                width: 100%;
+                align-items: center;
+            }
+            .filter-input { 
+                flex: 1;
+                padding: 7px 8px;
+                font-size: 11px;
+            }
+            .date-range-group span { 
+                font-size: 11px;
+                color: var(--text-muted);
+                white-space: nowrap;
+                padding: 0 2px;
+            }
             .charts-grid { grid-template-columns: 1fr; }
-            .cards-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
-            .card-value { font-size: 18px; }
+            .cards-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+            .card-value { font-size: 16px; }
         }
 
         @media (max-width: 480px) {
-            main { padding: 12px; }
+            main { padding: 70px 12px 12px 12px; }
             .modal { width: 90%; }
-            .card-value { font-size: 16px; }
-            .header h2 { font-size: 18px; }
-            .date-filter { flex-direction: column; }
-            .filter-input { width: 100%; }
+            .card-value { font-size: 14px; }
+            .header h2 { font-size: 16px; }
+            .date-filter { 
+                grid-template-columns: repeat(2, 1fr);
+                gap: 4px;
+            }
+            .filter-btn { 
+                padding: 6px 3px; 
+                font-size: 10px;
+            }
+            .date-range-group { 
+                grid-column: 1 / -1;
+                gap: 4px;
+            }
+            .filter-input { 
+                padding: 6px 6px;
+                font-size: 10px;
+            }
         }
     </style>
 </head>
@@ -321,13 +367,13 @@
 
                 <!-- Date Filter -->
                 <div class="date-filter">
-                    <button class="filter-btn active" data-range="month" onclick="setDateRange('month')">Este Mês</button>
-                    <button class="filter-btn" data-range="week" onclick="setDateRange('week')">Esta Semana</button>
+                    <button class="filter-btn active" data-range="month" onclick="setDateRange('month')">30 Dias</button>
+                    <button class="filter-btn" data-range="week" onclick="setDateRange('week')">7 Dias</button>
                     <button class="filter-btn" data-range="today" onclick="setDateRange('today')">Hoje</button>
                     <button class="filter-btn" data-range="yesterday" onclick="setDateRange('yesterday')">Ontem</button>
                     <div class="date-range-group">
                         <input type="date" class="filter-input" id="dateFrom" placeholder="De:" onchange="setDateRange('custom')">
-                        <span style="color:var(--text-muted); font-size:12px;">até</span>
+                        <span>até</span>
                         <input type="date" class="filter-input" id="dateTo" placeholder="Até:" onchange="setDateRange('custom')">
                     </div>
                 </div>
