@@ -928,21 +928,43 @@ CREATE POLICY "allow_all" ON transactions FOR ALL USING (true) WITH CHECK (true)
             msgDiv.scrollTop = msgDiv.scrollHeight;
 
             try {
+                // Check if API key is configured
+                let apiKey = localStorage.getItem('anthropic_api_key');
+                
+                if (!apiKey) {
+                    const bubble = document.createElement('div');
+                    bubble.className = 'chat-bubble chat-bot';
+                    bubble.innerHTML = `<span style="color:#FF0055; font-weight:700;">⚠ Chave de API não configurada</span><br><br>Para usar a IA, você precisa configurar sua chave de API do Anthropic:<br><br>1. Acesse <a href="https://console.anthropic.com" target="_blank" style="color:var(--primary-blue);">console.anthropic.com</a><br>2. Copie sua chave de API<br>3. Cole aqui: <input type="password" id="apiKeyInput" placeholder="sk-ant-..." style="width:100%; padding:8px; margin-top:8px; background:var(--dark-bg); border:1px solid var(--primary-blue); border-radius:6px; color:var(--text-light);" onkeydown="if(event.key==='Enter') saveApiKey()"><br><button onclick="saveApiKey()" style="width:100%; padding:8px; margin-top:8px; background:linear-gradient(135deg, var(--primary-blue), var(--secondary-blue)); border:none; border-radius:6px; color:var(--dark-bg); font-weight:700; cursor:pointer;">Salvar Chave</button>`;
+                    msgDiv.appendChild(bubble);
+                    msgDiv.scrollTop = msgDiv.scrollHeight;
+                    return;
+                }
+
                 const filtered = getFilteredTransactions();
                 const income = filtered.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
                 const expense = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
 
-                const sys = `Você é assistente financeira do casal Felipe e Stephanie. Fale em PT-BR casual.
+                const sys = `Você é assistente financeira do casal Felipe e Stephanie. Fale em PT-BR casual e amigável.
 Dados do período: Receitas ${fmt(income)} | Despesas ${fmt(expense)} | Saldo ${fmt(income - expense)}
 Categorias de despesa: Alimentação, Transporte, Saúde, Lazer, Casa, Educação, Roupas, Gatos, Antônio, Outros
 Categorias de receita: Salário, Freelance, Investimentos, Outros
-IMPORTANTE: Se o usuário mencionar que vai registrar uma despesa/receita, responda SOMENTE em JSON:
-{"message":"[sua confirmação em português]","action":{"type":"add_transaction","transaction":{"type":"expense ou income","description":"[descrição do gasto]","amount":[número],"category":"[categoria]","date":"${new Date().toISOString().split('T')[0]}"}}}
-Se for apenas pergunta ou conversa, responda em texto amigável normal.`;
+IMPORTANTE: Se o usuário mencionar CLARAMENTE que quer registrar uma despesa/receita, responda SOMENTE em JSON válido:
+{"message":"[sua confirmação em português]","action":{"type":"add_transaction","transaction":{"type":"expense ou income","description":"[descrição do gasto]","amount":[número],"category":"[categoria selecionada]","date":"${new Date().toISOString().split('T')[0]}"}}}
+Se for apenas pergunta ou conversa normal, responda em texto amigável normal SEM JSON.`;
+
+                // Show loading state
+                const loadingBubble = document.createElement('div');
+                loadingBubble.className = 'chat-bubble chat-bot';
+                loadingBubble.textContent = 'Pensando...';
+                msgDiv.appendChild(loadingBubble);
+                msgDiv.scrollTop = msgDiv.scrollHeight;
 
                 const res = await fetch('https://api.anthropic.com/v1/messages', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'x-api-key': apiKey
+                    },
                     body: JSON.stringify({
                         model: 'claude-sonnet-4-20250514',
                         max_tokens: 500,
@@ -950,6 +972,13 @@ Se for apenas pergunta ou conversa, responda em texto amigável normal.`;
                         messages: [{ role: 'user', content: input }]
                     })
                 });
+
+                msgDiv.removeChild(loadingBubble);
+
+                if (!res.ok) {
+                    const error = await res.json();
+                    throw new Error(error.error?.message || 'Erro na API do Anthropic');
+                }
 
                 const data = await res.json();
                 const raw = data.content?.[0]?.text || 'Tente novamente.';
@@ -985,11 +1014,33 @@ Se for apenas pergunta ou conversa, responda em texto amigável normal.`;
             } catch (e) {
                 const bubble = document.createElement('div');
                 bubble.className = 'chat-bubble chat-bot';
-                bubble.textContent = 'Erro ao conectar com IA. Tente novamente.';
+                bubble.textContent = '❌ Erro: ' + e.message;
                 msgDiv.appendChild(bubble);
             }
 
             msgDiv.scrollTop = msgDiv.scrollHeight;
+        }
+
+        function saveApiKey() {
+            const keyInput = document.getElementById('apiKeyInput');
+            const key = keyInput?.value?.trim();
+            
+            if (!key) {
+                alert('Digite a chave de API');
+                return;
+            }
+
+            if (!key.startsWith('sk-ant-')) {
+                alert('Chave inválida. Deve começar com "sk-ant-"');
+                return;
+            }
+
+            localStorage.setItem('anthropic_api_key', key);
+            alert('✅ Chave salva com sucesso!');
+            
+            // Limpar input e recarregar chat
+            const msgDiv = document.getElementById('chatMessages');
+            msgDiv.innerHTML = '<div class="chat-bubble chat-bot">Olá Felipe e Stephanie! 💰<br><br>Sou sua assistente financeira IA.<br><br>Tente: "Gastei R$50 no mercado"</div>';
         }
 
         window.addEventListener('load', () => {
